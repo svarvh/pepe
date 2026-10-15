@@ -673,18 +673,30 @@
   padding: 10px 36px 36px 36px;
 }
 
-.dashboard-grid {
+.dashboard-hero-section {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.dashboard-lower-grid {
   display: grid;
   grid-template-columns: 1fr 340px;
-  gap: 32px;
+  gap: 28px;
+  align-items: start;
 }
 
-.dashboard-main-col {
+.dashboard-lower-left {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
-.dashboard-right-col {
+.dashboard-lower-right {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .section-header-row {
@@ -719,7 +731,7 @@
   text-decoration: underline;
 }
 
-/* Dark Hero Progress Banner matching screenshot */
+/* Dark Hero Progress Banner matching screenshot front.webp */
 .hero-progress-banner {
   background-color: var(--navy-dark);
   border-radius: var(--radius-panel);
@@ -727,18 +739,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 28px;
-  margin-bottom: 24px;
+  gap: 32px;
+  margin-bottom: 0;
   box-shadow: 0 16px 36px rgba(41, 40, 64, 0.16);
   position: relative;
   overflow: visible;
+  width: 100%;
 }
 
 .hero-left-col {
   display: flex;
   flex-direction: column;
-  max-width: 330px;
-  flex-shrink: 0;
+  max-width: 440px;
+  flex: 1;
 }
 
 .hero-greeting {
@@ -960,7 +973,7 @@
 
 .statistics-grid {
   display: grid;
-  grid-template-columns: 140px 140px 1.5fr 1fr;
+  grid-template-columns: 1fr 1fr 1.6fr 1.3fr;
   gap: 16px;
 }
 
@@ -3744,7 +3757,7 @@
     padding: 10px 24px 24px 24px;
   }
 
-  .dashboard-grid {
+  .dashboard-lower-grid {
     grid-template-columns: 1fr;
     gap: 24px;
   }
@@ -3860,6 +3873,11 @@
   /* Dashboard View on Mobile */
   .dashboard-view {
     padding: 8px 16px 24px 16px;
+  }
+
+  .dashboard-lower-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .hero-progress-banner {

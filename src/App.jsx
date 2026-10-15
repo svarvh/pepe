@@ -20,6 +20,7 @@ export default function App() {
   const [user, setUser] = useState(StorageService.getUser());
   const [statistics, setStatistics] = useState(StorageService.getStatistics());
   const [practiceSubject, setPracticeSubject] = useState(null);
+  const [practiceQuestions, setPracticeQuestions] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Initialize persistent storage
@@ -36,17 +37,23 @@ export default function App() {
   const handleNavigate = (route) => {
     setCurrentRoute(route);
     setIsMobileMenuOpen(false);
+    if (route === "practice") {
+      setPracticeSubject(null);
+      setPracticeQuestions(null);
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleStartPracticeSubject = (subject) => {
     setPracticeSubject(subject);
+    setPracticeQuestions(null);
     setCurrentRoute("practice");
     setIsMobileMenuOpen(false);
   };
 
   const handleStartPracticeWithSet = (questionSet) => {
     setPracticeSubject(null);
+    setPracticeQuestions(questionSet);
     setCurrentRoute("practice");
     setIsMobileMenuOpen(false);
   };
@@ -96,6 +103,7 @@ export default function App() {
           {currentRoute === "practice" && (
             <PracticeView
               initialSubject={practiceSubject}
+              initialQuestions={practiceQuestions}
               onSessionCompleted={handleSessionCompleted}
               onNavigate={handleNavigate}
             />

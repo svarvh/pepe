@@ -13,74 +13,81 @@ import {
   Filter,
   Check,
   Award,
-  AlertCircle
+  AlertCircle,
+  SlidersHorizontal,
+  RefreshCw,
+  Target
 } from "lucide-react";
 import confetti from "canvas-confetti";
-import { EXAMS_CATALOG, SUBJECTS_CATALOG } from "../data/mockData";
+import { EXAMS_CATALOG, SUBJECTS_CATALOG, INITIAL_QUESTIONS } from "../data/mockData";
 import { StorageService } from "../services/storage";
 
-export default function PracticeView({ initialSubject, onSessionCompleted, onNavigate }) {
-  // Practice states: 'filter', 'practicing', 'results'
-  const [phase, setPhase] = useState("filter");
+export default function PracticeView({ initialSubject, initialQuestions, onSessionCompleted, onNavigate }) {
+  // Practice states: 'practicing', 'filter', 'results'
+  const [phase, setPhase] = useState("practicing");
 
   // Filter selections
   const [selectedExam, setSelectedExam] = useState("mcat");
-  const [selectedSubject, setSelectedSubject] = useState(initialSubject?.id || "phys");
+  const [selectedSubject, setSelectedSubject] = useState(initialSubject?.id || "all");
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [questionCount, setQuestionCount] = useState(5);
 
-  // Active Session state
-  const [activeQuestions, setActiveQuestions] = useState([]);
+  // Active Session state - initialize with default questions so it never renders blank or undefined
+  const [activeQuestions, setActiveQuestions] = useState(() => {
+    try {
+      const stored = StorageService.getQuestions();
+      return (stored && stored.length > 0) ? stored.slice(0, 5) : INITIAL_QUESTIONS.slice(0, 5);
+    } catch (e) {
+      return INITIAL_QUESTIONS.slice(0, 5);
+    }
+  });
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState({}); // { [qId]: selectedOptionId }
-  const [evaluatedAnswers, setEvaluatedAnswers] = useState({}); // { [qId]: boolean (true/false) }
+  const [userAnswers, setUserAnswers] = useState({});
+  const [evaluatedAnswers, setEvaluatedAnswers] = useState({});
   const [submittedCurrent, setSubmittedCurrent] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [bookmarkedIds, setBookmarkedIds] = useState(StorageService.getBookmarks());
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
+  const [bookmarkedIds, setBookmarkedIds] = useState([]);
   const [reportSuccess, setReportSuccess] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
+  // Load initial bookmarks safely
+  useEffect(() => {
+    try {
+      setBookmarkedIds(StorageService.getBookmarks() || []);
+    } catch (e) {
+      setBookmarkedIds([]);
+    }
+  }, []);
 
   // Timer hook
   useEffect(() => {
     let interval = null;
-    if (isTimerRunning) {
+    if (isTimerRunning && phase === "practicing") {
       interval = setInterval(() => {
         setElapsedSeconds(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isTimerRunning]);
+  }, [isTimerRunning, phase]);
 
-  // Update subject if passed from outside
+  // Load questions on mount or when initialSubject/initialQuestions changes
   useEffect(() => {
-    if (initialSubject) {
-      setSelectedSubject(initialSubject.id);
-      startSessionWithFilter(initialSubject.id);
+    if (initialQuestions && Array.isArray(initialQuestions) && initialQuestions.length > 0) {
+      loadCustomQuestionPool(initialQuestions);
+    } else if (initialSubject) {
+      const sId = typeof initialSubject === "object" ? initialSubject.id : initialSubject;
+      setSelectedSubject(sId || "all");
+      startSessionWithFilter(sId);
+    } else {
+      // Default: start practice immediately with high-yield questions
+      startSessionWithFilter("all");
     }
-  }, [initialSubject]);
+  }, [initialSubject, initialQuestions]);
 
-  // Start session with chosen filters
-  const startSessionWithFilter = (subIdOverride) => {
-    const sId = subIdOverride || selectedSubject;
-    const allQuestions = StorageService.getQuestions();
-
-    let filtered = allQuestions.filter(q => {
-      if (sId !== "all" && q.subjectId !== sId) return false;
-      if (selectedDifficulty !== "all" && q.difficulty !== selectedDifficulty) return false;
-      if (selectedType !== "all" && q.type !== selectedType) return false;
-      return true;
-    });
-
-    // If filter produced too few questions, pull general pool
-    if (filtered.length === 0) {
-      filtered = allQuestions.filter(q => sId === "all" || q.subjectId === sId);
-    }
-
-    // Shuffle and slice count
-    const pool = [...filtered].sort(() => 0.5 - Math.random()).slice(0, questionCount);
-
-    setActiveQuestions(pool);
+  const loadCustomQuestionPool = (questionsList) => {
+    setActiveQuestions(questionsList);
     setCurrentIndex(0);
     setUserAnswers({});
     setEvaluatedAnswers({});
@@ -90,14 +97,60 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
     setPhase("practicing");
   };
 
-  const currentQ = activeQuestions[currentIndex];
+  // Start session with chosen filters - with 100% guarantee that questions exist
+  const startSessionWithFilter = (subIdOverride) => {
+    const sId = subIdOverride !== undefined ? subIdOverride : selectedSubject;
+    let allQuestions = [];
+    try {
+      allQuestions = StorageService.getQuestions();
+    } catch (e) {
+      allQuestions = INITIAL_QUESTIONS;
+    }
+    if (!allQuestions || allQuestions.length === 0) {
+      allQuestions = INITIAL_QUESTIONS;
+    }
+
+    let filtered = allQuestions.filter(q => {
+      if (sId && sId !== "all" && q.subjectId !== sId) return false;
+      if (selectedDifficulty !== "all" && q.difficulty !== selectedDifficulty) return false;
+      if (selectedType !== "all" && q.type !== selectedType) return false;
+      return true;
+    });
+
+    // If filter produced too few questions, pull general pool
+    if (filtered.length === 0) {
+      filtered = allQuestions.filter(q => sId === "all" || q.subjectId === sId);
+    }
+    // If still empty, fall back to entire initial questions bank
+    if (filtered.length === 0) {
+      filtered = INITIAL_QUESTIONS;
+    }
+
+    const count = Math.min(questionCount || 5, filtered.length);
+    const pool = [...filtered].sort(() => 0.5 - Math.random()).slice(0, count);
+
+    setActiveQuestions(pool);
+    setCurrentIndex(0);
+    setUserAnswers({});
+    setEvaluatedAnswers({});
+    setSubmittedCurrent(false);
+    setElapsedSeconds(0);
+    setIsTimerRunning(true);
+    setPhase("practicing");
+    setShowFilterModal(false);
+  };
+
+  // Guaranteed safe current question fallback
+  const currentQ = (activeQuestions && activeQuestions.length > 0)
+    ? activeQuestions[currentIndex] || activeQuestions[0]
+    : INITIAL_QUESTIONS[0];
 
   const handleSelectOption = (optionId) => {
-    if (submittedCurrent) return; // Prevent changing after submit
-    setUserAnswers({
-      ...userAnswers,
+    if (submittedCurrent || !currentQ) return;
+    setUserAnswers(prev => ({
+      ...prev,
       [currentQ.id]: optionId
-    });
+    }));
   };
 
   const handleSubmitAnswer = () => {
@@ -120,9 +173,10 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
 
   const handleNext = () => {
     if (currentIndex < activeQuestions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      const nextQ = activeQuestions[currentIndex + 1];
-      setSubmittedCurrent(evaluatedAnswers[nextQ.id] !== undefined);
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
+      const nextQ = activeQuestions[nextIdx];
+      setSubmittedCurrent(nextQ && evaluatedAnswers[nextQ.id] !== undefined);
     } else {
       finishSession();
     }
@@ -130,21 +184,25 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
 
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      const prevQ = activeQuestions[currentIndex - 1];
-      setSubmittedCurrent(evaluatedAnswers[prevQ.id] !== undefined);
+      const prevIdx = currentIndex - 1;
+      setCurrentIndex(prevIdx);
+      const prevQ = activeQuestions[prevIdx];
+      setSubmittedCurrent(prevQ && evaluatedAnswers[prevQ.id] !== undefined);
     }
   };
 
   const handleToggleBookmark = (qId) => {
-    const updated = StorageService.toggleBookmark(qId);
-    setBookmarkedIds(updated);
+    try {
+      const updated = StorageService.toggleBookmark(qId);
+      setBookmarkedIds(updated);
+    } catch (e) {
+      // safe fallback
+    }
   };
 
   const finishSession = () => {
     setIsTimerRunning(false);
 
-    // Calculate score
     let correctCount = 0;
     const missedList = [];
     const topicMap = {};
@@ -165,11 +223,10 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
       if (isCorrect) topicMap[tName].correct++;
     });
 
-    const accuracy = activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0;
-
+    const totalCount = activeQuestions.length || 1;
+    const accuracy = Math.round((correctCount / totalCount) * 100);
     const subObj = SUBJECTS_CATALOG.find(s => s.id === selectedSubject) || SUBJECTS_CATALOG[0];
 
-    // Save session in storage
     const newSession = {
       id: `sess-${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -189,8 +246,12 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
       missedQuestionIds: missedList.map(q => q.id)
     };
 
-    StorageService.saveSession(newSession);
-    if (onSessionCompleted) onSessionCompleted(newSession);
+    try {
+      StorageService.saveSession(newSession);
+      if (onSessionCompleted) onSessionCompleted(newSession);
+    } catch (e) {
+      console.error("Failed saving session:", e);
+    }
 
     if (accuracy >= 70) {
       try {
@@ -230,125 +291,13 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
   };
 
   // --------------------------------------------------------------------------
-  // RENDER: 1. Filter Setup View
-  // --------------------------------------------------------------------------
-  if (phase === "filter") {
-    return (
-      <div className="practice-view fade-in">
-        <div className="practice-filter-card">
-          <div className="filter-card-header">
-            <div className="filter-header-left">
-              <div className="practice-badge-icon">
-                <Target size={24} strokeWidth={2.2} />
-              </div>
-              <div>
-                <h2 className="practice-headline">Question Practice Studio</h2>
-                <p className="practice-subtext">Configure custom practice parameters or jump straight into high-yield drills.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="filter-form-grid">
-            {/* Exam selector */}
-            <div className="filter-group">
-              <label className="filter-label">Exam / Curriculum</label>
-              <select
-                className="filter-select"
-                value={selectedExam}
-                onChange={(e) => setSelectedExam(e.target.value)}
-              >
-                {EXAMS_CATALOG.map(exam => (
-                  <option key={exam.id} value={exam.id}>{exam.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Subject selector */}
-            <div className="filter-group">
-              <label className="filter-label">Subject</label>
-              <select
-                className="filter-select"
-                value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
-              >
-                <option value="all">All Subjects (Combined Drill)</option>
-                {SUBJECTS_CATALOG.map(sub => (
-                  <option key={sub.id} value={sub.id}>{sub.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Difficulty */}
-            <div className="filter-group">
-              <label className="filter-label">Difficulty Level</label>
-              <select
-                className="filter-select"
-                value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
-              >
-                <option value="all">All Difficulties (Adaptive)</option>
-                <option value="Easy">Easy (Foundational)</option>
-                <option value="Medium">Medium (Exam Standard)</option>
-                <option value="Hard">Hard (Advanced Challenge)</option>
-              </select>
-            </div>
-
-            {/* Question Type */}
-            <div className="filter-group">
-              <label className="filter-label">Question Format</label>
-              <select
-                className="filter-select"
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-              >
-                <option value="all">All Formats (MCQ, T/F, Short)</option>
-                <option value="mcq">Multiple Choice (Single Best)</option>
-                <option value="true_false">True / False</option>
-                <option value="short_answer">Short Answer / Numeric</option>
-              </select>
-            </div>
-
-            {/* Number of Questions */}
-            <div className="filter-group">
-              <label className="filter-label">Question Count</label>
-              <div className="count-pill-selector">
-                {[5, 10, 15, 20].map(cnt => (
-                  <button
-                    key={cnt}
-                    type="button"
-                    className={`count-pill ${questionCount === cnt ? "active" : ""}`}
-                    onClick={() => setQuestionCount(cnt)}
-                  >
-                    {cnt} Qs
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="filter-cta-row">
-            <button
-              className="pill-btn pill-btn-dark start-practice-btn"
-              id="start-practice-btn"
-              onClick={() => startSessionWithFilter()}
-            >
-              <span>Start Practice Session</span>
-              <ArrowRight size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --------------------------------------------------------------------------
-  // RENDER: 2. Active Question Practice Interface
+  // RENDER: Active Question Practice Interface (Default & Primary View)
   // --------------------------------------------------------------------------
   if (phase === "practicing" && currentQ) {
     const isBookmarked = bookmarkedIds.includes(currentQ.id);
     const chosenOption = userAnswers[currentQ.id];
-    const isEvaluated = evaluatedAnswers[currentQ.id] !== undefined;
-    const progressPercent = Math.round(((currentIndex + 1) / activeQuestions.length) * 100);
+    const totalQCount = Math.max(activeQuestions.length, 1);
+    const progressPercent = Math.round(((currentIndex + 1) / totalQCount) * 100);
 
     return (
       <div className="practice-view fade-in">
@@ -357,10 +306,10 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
           <div className="session-status-bar">
             <div className="session-breadcrumbs">
               <span className="badge badge-navy">
-                Question {currentIndex + 1} of {activeQuestions.length}
+                Question {currentIndex + 1} of {totalQCount}
               </span>
               <span className="badge badge-lavender">{currentQ.unit || "Core"}</span>
-              <span className="badge badge-cream">{currentQ.difficulty}</span>
+              <span className="badge badge-cream">{currentQ.difficulty || "Medium"}</span>
               {currentQ.pyqReference && (
                 <span className="badge badge-lime">{currentQ.pyqReference}</span>
               )}
@@ -383,14 +332,11 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
 
               <button
                 className="action-icon-pill"
-                title="Report Issue"
-                onClick={() => {
-                  setReportSuccess(true);
-                  setTimeout(() => setReportSuccess(false), 2500);
-                }}
+                title="Filter / Topic Selector"
+                onClick={() => setShowFilterModal(true)}
               >
-                <Flag size={15} />
-                <span>Report</span>
+                <SlidersHorizontal size={15} />
+                <span>Filters</span>
               </button>
 
               <button
@@ -526,12 +472,85 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
             )}
           </div>
         </div>
+
+        {/* Filter Configuration Modal */}
+        {showFilterModal && (
+          <div className="modal-backdrop fade-in" onClick={() => setShowFilterModal(false)}>
+            <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Configure Practice Drill</h3>
+                <button className="modal-close-btn" onClick={() => setShowFilterModal(false)}>×</button>
+              </div>
+
+              <div className="modal-body-form">
+                <div className="form-group-block">
+                  <label className="form-label">Subject</label>
+                  <select
+                    className="filter-select"
+                    value={selectedSubject}
+                    onChange={(e) => setSelectedSubject(e.target.value)}
+                  >
+                    <option value="all">All Subjects (Combined Practice)</option>
+                    {SUBJECTS_CATALOG.map(sub => (
+                      <option key={sub.id} value={sub.id}>{sub.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group-block">
+                  <label className="form-label">Difficulty</label>
+                  <select
+                    className="filter-select"
+                    value={selectedDifficulty}
+                    onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  >
+                    <option value="all">All Difficulties</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                </div>
+
+                <div className="form-group-block">
+                  <label className="form-label">Question Count</label>
+                  <div className="count-pill-selector">
+                    {[5, 10, 15, 20].map(cnt => (
+                      <button
+                        key={cnt}
+                        type="button"
+                        className={`count-pill ${questionCount === cnt ? "active" : ""}`}
+                        onClick={() => setQuestionCount(cnt)}
+                      >
+                        {cnt} Qs
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="modal-footer-row">
+                  <button
+                    className="pill-btn pill-btn-white"
+                    onClick={() => setShowFilterModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="pill-btn pill-btn-dark"
+                    onClick={() => startSessionWithFilter()}
+                  >
+                    Apply & Start Drill
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
   // --------------------------------------------------------------------------
-  // RENDER: 3. Results Screen
+  // RENDER: Results Screen
   // --------------------------------------------------------------------------
   if (phase === "results") {
     let correctCount = 0;
@@ -545,7 +564,8 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
       }
     });
 
-    const accuracy = activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0;
+    const totalCount = activeQuestions.length || 1;
+    const accuracy = Math.round((correctCount / totalCount) * 100);
 
     return (
       <div className="practice-view fade-in">
@@ -616,7 +636,7 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
           <div className="results-footer-actions">
             <button
               className="pill-btn pill-btn-dark"
-              onClick={() => setPhase("filter")}
+              onClick={() => startSessionWithFilter("all")}
             >
               Start Another Practice Drill
             </button>
@@ -632,5 +652,32 @@ export default function PracticeView({ initialSubject, onSessionCompleted, onNav
     );
   }
 
-  return null;
+  // Fallback: If somehow state was interrupted, render a clean instant-start drill card
+  return (
+    <div className="practice-view fade-in">
+      <div className="practice-filter-card">
+        <div className="filter-card-header">
+          <div className="filter-header-left">
+            <div className="practice-badge-icon">
+              <Target size={24} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h2 className="practice-headline">Question Practice Studio</h2>
+              <p className="practice-subtext">Click below to start your personalized practice session.</p>
+            </div>
+          </div>
+        </div>
+        <div className="filter-cta-row">
+          <button
+            className="pill-btn pill-btn-dark start-practice-btn"
+            id="start-practice-btn"
+            onClick={() => startSessionWithFilter("all")}
+          >
+            <span>Start Practice Drill Now</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

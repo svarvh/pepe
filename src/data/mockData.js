@@ -170,6 +170,26 @@ export const INITIAL_QUESTIONS = [
     marks: 2,
     pyqReference: "Foundational Physics Exam Archive"
   },
+  {
+    id: "q-phys-05",
+    examId: "mcat",
+    subjectId: "phys",
+    unit: "Wave Mechanics & Sound",
+    topic: "Resonance in Pipes",
+    type: "mcq",
+    difficulty: "Medium",
+    text: "For a pipe of length L closed at one end and open at the other, what is the wavelength of the fundamental harmonic?",
+    options: [
+      { id: "A", text: "λ = 2L" },
+      { id: "B", text: "λ = 4L" },
+      { id: "C", text: "λ = L" },
+      { id: "D", text: "λ = L/2" }
+    ],
+    correctAnswer: "B",
+    explanation: "A closed-one-end pipe has a displacement node at the closed end and an antinode at the open end. The distance from node to antinode is a quarter wavelength (L = λ/4), so λ = 4L.",
+    marks: 3,
+    pyqReference: "MCAT Physical Foundations 2023"
+  },
 
   // --- Chemistry Questions ---
   {
@@ -226,6 +246,26 @@ export const INITIAL_QUESTIONS = [
     explanation: "At pH 7.4, the alpha-carboxyl group (pKa 2.34) is deprotonated into a negatively charged carboxylate (-COO⁻, -1). The alpha-amino group (pKa 9.69) remains protonated as an ammonium ion (-NH3⁺, +1). The net charge is (-1) + (+1) = 0, existing primarily as a zwitterion.",
     marks: 3,
     pyqReference: "MCAT Biochemical Foundations 2023"
+  },
+  {
+    id: "q-chem-04",
+    examId: "mcat",
+    subjectId: "chem",
+    unit: "Carbonyl Chemistry",
+    topic: "Aldol Condensation",
+    type: "mcq",
+    difficulty: "Hard",
+    text: "In base-catalyzed aldol condensation of acetaldehyde, what is the initial reactive intermediate formed by hydroxide deprotonation?",
+    options: [
+      { id: "A", text: "Enolate resonance hybrid" },
+      { id: "B", text: "Carbocation at C-1" },
+      { id: "C", text: "Oxonium ion" },
+      { id: "D", text: "Acyl radical" }
+    ],
+    correctAnswer: "A",
+    explanation: "Hydroxide abstracts an alpha-proton adjacent to the carbonyl group, generating a resonance-stabilized enolate anion (carbanion ↔ enol-oxide).",
+    marks: 4,
+    pyqReference: "MCAT Chemical Foundations 2024"
   },
 
   // --- Mathematics Questions ---
@@ -449,9 +489,9 @@ export const IMPORTANT_TOPICS = [
     subjectId: "phys",
     unit: "Wave Mechanics & Sound",
     title: "Doppler Effect & Resonance in Open/Closed Pipes",
-    priority: "High", // High, Medium, Low
+    priority: "High",
     testedFrequency: "Tested in 9 of last 10 AAMC exams",
-    status: "in_progress", // not_started, in_progress, revised, completed
+    status: "in_progress",
     overview: "The Doppler effect describes the observed frequency shift when source and detector are in relative motion. Longitudinal sound waves forming standing patterns in air columns are tested in both clinical ultrasound and pulmonary diagnostics.",
     keyConcepts: [
       "Apparent frequency equation: f' = f * [(v ± v_d) / (v ∓ v_s)]",
@@ -464,8 +504,8 @@ export const IMPORTANT_TOPICS = [
       "v = f * λ",
       "β = 10 * log10(I / I_0) [Sound Level in dB]"
     ],
-    revisionNotes: "Always assign directions before plugging into the Doppler equation. If distance is closing, perceived frequency MUST be higher than source frequency. For ultrasound Doppler, the beat frequency shift is proportional to red blood cell velocity.",
-    sampleQuestionIds: ["q-phys-01"]
+    revisionNotes: "Always assign directions before plugging into the Doppler equation. If distance is closing, perceived frequency MUST be higher than source frequency.",
+    sampleQuestionIds: ["q-phys-01", "q-phys-05"]
   },
   {
     id: "top-02",
@@ -487,7 +527,7 @@ export const IMPORTANT_TOPICS = [
       "Max stereoisomers = 2^n (where n = number of chiral centers)",
       "[α] = α_observed / (c * l) [Specific rotation]"
     ],
-    revisionNotes: "Enantiomers have equal and opposite specific rotations. A 50:50 racemic mixture produces zero net optical rotation. Separation of enantiomers requires chiral resolution reagents or chiral chromatography.",
+    revisionNotes: "Enantiomers have equal and opposite specific rotations. A 50:50 racemic mixture produces zero net optical rotation.",
     sampleQuestionIds: ["q-chem-01"]
   },
   {
@@ -544,8 +584,7 @@ export const IMPORTANT_TOPICS = [
     keyConcepts: [
       "NADH enters at Complex I (pumps 4 H+); FADH2 enters at Complex II (does not pump H+).",
       "Coenzyme Q (ubiquinone) and Cytochrome c act as mobile electron shuttles.",
-      "Oxygen is reduced to water at Complex IV.",
-      "Oligomycin inhibits ATP synthase; DNP uncouples the proton gradient as heat."
+      "Oxygen is reduced to water at Complex IV."
     ],
     formulas: [
       "1 NADH ≈ 2.5 ATP",
@@ -567,7 +606,7 @@ export const INITIAL_PRACTICE_SESSIONS = [
     totalQuestions: 15,
     correctAnswers: 12,
     accuracy: 80,
-    timeSpentSeconds: 780, // 13 mins
+    timeSpentSeconds: 780,
     topicBreakdown: [
       { topic: "Wave Optics", correct: 5, total: 6 },
       { topic: "Doppler Effect", correct: 4, total: 5 },
@@ -585,7 +624,7 @@ export const INITIAL_PRACTICE_SESSIONS = [
     totalQuestions: 20,
     correctAnswers: 17,
     accuracy: 85,
-    timeSpentSeconds: 1140, // 19 mins
+    timeSpentSeconds: 1140,
     topicBreakdown: [
       { topic: "SN1 vs SN2", correct: 8, total: 9 },
       { topic: "Stereochemistry", correct: 9, total: 11 }
@@ -602,7 +641,7 @@ export const INITIAL_PRACTICE_SESSIONS = [
     totalQuestions: 25,
     correctAnswers: 16,
     accuracy: 64,
-    timeSpentSeconds: 1650, // 27.5 mins
+    timeSpentSeconds: 1650,
     topicBreakdown: [
       { topic: "L'Hôpital's Rule", correct: 7, total: 10 },
       { topic: "Definite Integrals", correct: 9, total: 15 }

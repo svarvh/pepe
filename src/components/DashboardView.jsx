@@ -22,7 +22,7 @@ import {
 import { SUBJECTS_CATALOG } from "../data/mockData";
 
 export default function DashboardView({ user, statistics, onNavigate, onStartPracticeSubject }) {
-  const [selectedDate, setSelectedDate] = useState(27); // Oct 27 matching screenshot
+  const [selectedDate, setSelectedDate] = useState(27); // Oct 27 matching reference
   const [currentMonth, setCurrentMonth] = useState("October 2026");
 
   // Subject cards for the dark feature banner
@@ -66,103 +66,106 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
 
   return (
     <div className="dashboard-view fade-in">
-      <div className="dashboard-grid">
-        {/* Left / Main Column */}
-        <div className="dashboard-main-col">
-          {/* Section Heading */}
-          <div className="section-header-row">
-            <h2 className="section-title">My progress</h2>
+      {/* 1. TOP HERO SECTION (Spans full width matching reference screenshot front.webp) */}
+      <div className="dashboard-hero-section">
+        <div className="section-header-row">
+          <h2 className="section-title">My progress</h2>
+        </div>
+
+        {/* Hero Progress Banner matching screenshot */}
+        <div className="hero-progress-banner">
+          <div className="hero-left-col">
+            <span className="hero-greeting">Hi, {user.name}!</span>
+            <h1 className="hero-headline">
+              You have completed {statistics.completedThisWeek || 84} questions this week!
+            </h1>
+            <button
+              className="pill-btn pill-btn-white hero-cta-btn"
+              id="hero-see-all-btn"
+              onClick={() => onNavigate("practice")}
+            >
+              <span>SEE ALL</span>
+              <ArrowUpRight size={16} strokeWidth={2.5} />
+            </button>
           </div>
 
-          {/* Hero Feature Dark Navy Banner */}
-          <div className="hero-progress-banner">
-            <div className="hero-left-col">
-              <span className="hero-greeting">Hi, {user.name}!</span>
-              <h1 className="hero-headline">
-                You have completed {statistics.completedThisWeek || 84} questions this week!
-              </h1>
-              <button
-                className="pill-btn pill-btn-white hero-cta-btn"
-                id="hero-see-all-btn"
-                onClick={() => onNavigate("practice")}
-              >
-                <span>SEE ALL</span>
-                <ArrowUpRight size={16} strokeWidth={2.5} />
-              </button>
-            </div>
+          {/* 3 Pastel Subject Cards inside Navy Banner */}
+          <div className="hero-cards-row">
+            {heroSubjects.map((sub) => {
+              const isLime = sub.themeColor === "lime";
+              const isLavender = sub.themeColor === "lavender";
+              const isCream = sub.themeColor === "cream";
 
-            {/* Pastel Subject Cards inside Navy Banner */}
-            <div className="hero-cards-row">
-              {heroSubjects.map((sub, idx) => {
-                const isLime = sub.themeColor === "lime";
-                const isLavender = sub.themeColor === "lavender";
-                const isCream = sub.themeColor === "cream";
-
-                return (
-                  <div
-                    key={sub.id}
-                    className={`subject-card subject-card-${sub.themeColor} ${isLime ? "card-highlight-tilt" : ""}`}
-                    onClick={() => onStartPracticeSubject(sub)}
-                    title={`Click to practice ${sub.name}`}
-                  >
-                    <div className="card-top-bar">
-                      <span className="card-num">{sub.cardNum}</span>
-                      <button className="card-more-btn" onClick={(e) => { e.stopPropagation(); onStartPracticeSubject(sub); }}>
-                        <MoreVertical size={16} />
-                      </button>
-                    </div>
-
-                    <div className="card-icon-box">
-                      {isLavender && <Layers size={28} strokeWidth={2} />}
-                      {isCream && <LayoutGrid size={28} strokeWidth={2} />}
-                      {isLime && <Box size={28} strokeWidth={2} />}
-                    </div>
-
-                    <div className="card-title-box">
-                      <h3 className="card-subject-name">{sub.name}</h3>
-                      <p className="card-subject-meta">
-                        {sub.totalQuestions} questions | {sub.accuracy}% acc
-                      </p>
-                    </div>
-
-                    {/* Dark pill progress bar */}
-                    <div className="card-progress-track">
-                      <div
-                        className="card-progress-fill"
-                        style={{ width: `${sub.progress}%` }}
-                      />
-                    </div>
+              return (
+                <div
+                  key={sub.id}
+                  className={`subject-card subject-card-${sub.themeColor} ${isLime ? "card-highlight-tilt" : ""}`}
+                  onClick={() => onStartPracticeSubject(sub)}
+                  title={`Click to practice ${sub.name}`}
+                >
+                  <div className="card-top-bar">
+                    <span className="card-num">{sub.cardNum}</span>
+                    <button className="card-more-btn" onClick={(e) => { e.stopPropagation(); onStartPracticeSubject(sub); }}>
+                      <MoreVertical size={16} />
+                    </button>
                   </div>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Quick Actions Bar */}
-          <div className="quick-actions-section">
-            <div className="quick-actions-grid">
-              {quickActions.map(action => {
-                const Icon = action.icon;
-                return (
-                  <button
-                    key={action.id}
-                    id={`quick-action-${action.id}`}
-                    className="quick-action-card"
-                    onClick={() => onNavigate(action.id)}
-                  >
-                    <div className={`quick-action-icon-wrap bg-${action.color}`}>
-                      <Icon size={18} strokeWidth={2.2} />
-                    </div>
-                    <div className="quick-action-text-col">
-                      <span className="quick-action-label">{action.label}</span>
-                      <span className="quick-action-badge">{action.badge}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                  <div className="card-icon-box">
+                    {isLavender && <Layers size={28} strokeWidth={2} />}
+                    {isCream && <LayoutGrid size={28} strokeWidth={2} />}
+                    {isLime && <Box size={28} strokeWidth={2} />}
+                  </div>
 
+                  <div className="card-title-box">
+                    <h3 className="card-subject-name">{sub.name}</h3>
+                    <p className="card-subject-meta">
+                      {sub.totalQuestions} questions | {sub.accuracy}% acc
+                    </p>
+                  </div>
+
+                  {/* Dark pill progress bar */}
+                  <div className="card-progress-track">
+                    <div
+                      className="card-progress-fill"
+                      style={{ width: `${sub.progress}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. QUICK ACTIONS BAR */}
+      <div className="quick-actions-section">
+        <div className="quick-actions-grid">
+          {quickActions.map(action => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.id}
+                id={`quick-action-${action.id}`}
+                className="quick-action-card"
+                onClick={() => onNavigate(action.id)}
+              >
+                <div className={`quick-action-icon-wrap bg-${action.color}`}>
+                  <Icon size={18} strokeWidth={2.2} />
+                </div>
+                <div className="quick-action-text-col">
+                  <span className="quick-action-label">{action.label}</span>
+                  <span className="quick-action-badge">{action.badge}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 3. TWO-COLUMN LOWER SECTION (Left: Stats + Assignments; Right: Calendar + Upcoming) */}
+      <div className="dashboard-lower-grid">
+        {/* Left Column: Statistics & Assignments */}
+        <div className="dashboard-lower-left">
           {/* Statistics Row */}
           <div className="statistics-section">
             <h2 className="section-title">Statistics</h2>
@@ -270,8 +273,8 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
           </div>
         </div>
 
-        {/* Right Sidebar Column: Calendar & Upcoming */}
-        <div className="dashboard-right-col">
+        {/* Right Column: Calendar ON TOP, Upcoming DIRECTLY BELOW IT (Matching reference front.webp) */}
+        <div className="dashboard-lower-right">
           {/* Calendar Widget matching reference screenshot */}
           <div className="calendar-card">
             <div className="calendar-header">
@@ -299,7 +302,6 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
 
             {/* Days Grid */}
             <div className="calendar-grid">
-              {/* Previous month trailing days */}
               <div className="cal-day cal-day-muted">31</div>
               <div className="cal-day">1</div>
               <div className="cal-day">2</div>
@@ -357,7 +359,7 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
             </div>
           </div>
 
-          {/* Upcoming Section matching screenshot */}
+          {/* Upcoming Section directly below Calendar */}
           <div className="upcoming-section">
             <div className="section-header-row">
               <h3 className="section-subtitle">Upcoming</h3>
@@ -366,7 +368,7 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
               </button>
             </div>
 
-            {/* Upcoming Event Card */}
+            {/* Upcoming Event Card matching screenshot */}
             <div
               className="upcoming-card"
               onClick={() => onNavigate("practice")}
