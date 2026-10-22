@@ -2,17 +2,19 @@ import React from "react";
 import {
   LayoutDashboard,
   Target,
-  Sparkles,
-  FolderHeart,
+  BookOpen,
+  Sliders,
+  Trophy,
   Menu
 } from "lucide-react";
 
 export default function BottomNav({ currentRoute, onNavigate, onOpenMenu }) {
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "smart-notes", label: "Notes", icon: BookOpen },
     { id: "practice", label: "Practice", icon: Target },
-    { id: "ai-generator", label: "Generate", icon: Sparkles },
-    { id: "library", label: "Library", icon: FolderHeart },
+    { id: "test-builder", label: "Tests", icon: Sliders },
+    { id: "results", label: "Results", icon: Trophy },
   ];
 
   return (

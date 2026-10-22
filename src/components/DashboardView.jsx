@@ -29,12 +29,23 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
   const heroSubjects = SUBJECTS_CATALOG.slice(0, 3);
 
   const quickActions = [
-    { id: "practice", label: "Start Practicing", icon: Target, badge: "Popular", color: "lime" },
-    { id: "ai-generator", label: "Generate Questions", icon: Sparkles, badge: "AI Powered", color: "lavender" },
-    { id: "pyq", label: "Previous Year Papers", icon: FileText, badge: "2020-2024", color: "cream" },
-    { id: "topics", label: "Important Topics", icon: BookmarkCheck, badge: "High Yield", color: "lavender" },
-    { id: "import", label: "Import Questions", icon: UploadCloud, badge: "PDF/CSV", color: "lime" },
-    { id: "self-generator", label: "Create My Questions", icon: PenTool, badge: "Studio", color: "cream" },
+    { id: "smart-notes", label: "Smart Notes & Terms", icon: BookOpen, badge: "Module A", color: "lime" },
+    { id: "videos", label: "Topic Video Lessons", icon: Sparkles, badge: "Module C", color: "lavender" },
+    { id: "practice", label: "Practice Questions", icon: Target, badge: "10+ / Topic", color: "lime" },
+    { id: "test-builder", label: "Custom Test Builder", icon: FileText, badge: "Module D", color: "cream" },
+    { id: "results", label: "Instant Results", icon: BookmarkCheck, badge: "Section 4", color: "lavender" },
+    { id: "doubt-solver", label: "AI Doubt Assistant", icon: Sparkles, badge: "NCERT", color: "lime" },
+    { id: "revision", label: "Revision & Notebook", icon: PenTool, badge: "Spaced Rep", color: "cream" },
+    { id: "checklist", label: "Launch Checklist", icon: UploadCloud, badge: "20/20 Ready", color: "lavender" },
+  ];
+
+  const learningJourneySteps = [
+    { step: 1, title: "1. Select Course", desc: "Class 9-12 / JEE / NET", route: "dashboard", color: "lime" },
+    { step: 2, title: "2. Learn Topic", desc: "Notes, terms & videos", route: "smart-notes", color: "lavender" },
+    { step: 3, title: "3. Practise 10+ Qs", desc: "Hints, solutions & levels", route: "practice", color: "cream" },
+    { step: 4, title: "4. Custom Test", desc: "Timed blueprint exam", route: "test-builder", color: "lime" },
+    { step: 5, title: "5. Instant Results", desc: "Score & weak areas", route: "results", color: "lavender" },
+    { step: 6, title: "6. Revise & Improve", desc: "Spaced rep & mistakes", route: "revision", color: "cream" }
   ];
 
   const recentPractices = [
@@ -134,6 +145,30 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Complete Student Learning Journey (Section 2 of Roadmap) */}
+      <div className="learning-journey-section">
+        <div className="section-header-row">
+          <h2 className="section-title">The Complete Student Learning Journey</h2>
+          <span className="badge badge-lime">End-to-End Learning Loop</span>
+        </div>
+        <div className="learning-journey-grid">
+          {learningJourneySteps.map((step) => (
+            <button
+              key={step.step}
+              className="journey-step-card"
+              onClick={() => onNavigate(step.route)}
+            >
+              <div className="journey-step-top">
+                <span className={`step-circle bg-${step.color}`}>0{step.step}</span>
+                <span className="journey-arrow">&rarr;</span>
+              </div>
+              <h4 className="journey-step-title">{step.title}</h4>
+              <p className="journey-step-desc">{step.desc}</p>
+            </button>
+          ))}
         </div>
       </div>
 

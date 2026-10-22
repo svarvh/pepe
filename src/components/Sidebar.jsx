@@ -11,20 +11,30 @@ import {
   BarChart2,
   Settings,
   LogOut,
-  X
+  X,
+  BookOpen,
+  Video,
+  Sliders,
+  Trophy,
+  RotateCcw,
+  ShieldCheck,
+  CheckCircle2,
+  HelpCircle
 } from "lucide-react";
 
 export default function Sidebar({ currentRoute, onNavigate, onLogout, isMobileOpen, onCloseMobile }) {
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "practice", label: "Practice Questions", icon: Target },
-    { id: "ai-generator", label: "Question Generator", icon: Sparkles },
+    { id: "smart-notes", label: "Smart Notes & Terms", icon: BookOpen, badge: "Module A" },
+    { id: "videos", label: "Topic Videos", icon: Video, badge: "Module C" },
+    { id: "practice", label: "Practice Questions", icon: Target, badge: "10+ / Topic" },
+    { id: "test-builder", label: "Custom Test Builder", icon: Sliders, badge: "Module D" },
+    { id: "results", label: "Instant Results & Score", icon: Trophy, badge: "Section 4" },
+    { id: "doubt-solver", label: "AI Doubt Assistant", icon: Sparkles, badge: "NCERT" },
+    { id: "revision", label: "Revision & Notebook", icon: RotateCcw },
     { id: "pyq", label: "Previous Year Papers", icon: FileText },
-    { id: "topics", label: "Important Topics", icon: BookmarkCheck },
-    { id: "import", label: "Import Questions", icon: UploadCloud },
-    { id: "self-generator", label: "Self Question Generator", icon: PenTool },
-    { id: "library", label: "My Library", icon: FolderHeart },
-    { id: "analytics", label: "Performance Analytics", icon: BarChart2 },
+    { id: "admin", label: "Teacher & Admin CMS", icon: ShieldCheck, badge: "Section 6" },
+    { id: "checklist", label: "Launch Checklist", icon: CheckCircle2, badge: "20/20" },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -121,6 +131,7 @@ export default function Sidebar({ currentRoute, onNavigate, onLogout, isMobileOp
                   <Icon size={19} strokeWidth={isActive ? 2.5 : 2} />
                 </div>
                 <span className="nav-item-label">{item.label}</span>
+                {item.badge && <span className="nav-item-badge">{item.badge}</span>}
                 {isActive && <div className="active-pill-indicator" />}
               </button>
             );

@@ -1,37 +1,71 @@
 import React, { useState } from "react";
-import { Search, Mail, Bell, X, ArrowUpRight, BookOpen, FileText, Menu } from "lucide-react";
+import {
+  Search,
+  Mail,
+  Bell,
+  X,
+  ArrowUpRight,
+  BookOpen,
+  FileText,
+  Menu,
+  Sparkles,
+  Layers,
+  Video,
+  ChevronDown,
+  GraduationCap
+} from "lucide-react";
 import { StorageService } from "../services/storage";
 
-export default function Header({ user, onNavigate, onOpenMobileMenu }) {
+export default function Header({ user, onNavigate, onOpenMobileMenu, onSelectTerm, activeCourse, onCourseChange }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showCourseMenu, setShowCourseMenu] = useState(false);
   const [isMobileSearchExpanded, setIsMobileSearchExpanded] = useState(false);
 
+  const courses = StorageService.getCourses();
+  const currentCourse = StorageService.getCourseById(activeCourse || StorageService.getActiveCourse());
   const allQuestions = StorageService.getQuestions();
   const allPapers = StorageService.getPapers();
+  const allTerms = StorageService.getAllTerminology();
 
-  // Live matching search results
+  // Search across 1. Glossary Terms
+  const matchingTerms = searchQuery.trim().length > 1
+    ? Object.values(allTerms).filter(t =>
+        t.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.hindiTerm && t.hindiTerm.includes(searchQuery)) ||
+        t.category.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 3)
+    : [];
+
+  // Search across 2. Questions
   const matchingQuestions = searchQuery.trim().length > 1
     ? allQuestions.filter(q =>
         q.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
         q.topic?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         q.unit?.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 4)
+      ).slice(0, 3)
     : [];
 
+  // Search across 3. Papers & Notes
   const matchingPapers = searchQuery.trim().length > 1
     ? allPapers.filter(p =>
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.subject.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 3)
+      ).slice(0, 2)
     : [];
 
   const notifications = [
-    { id: 1, title: "Mock Test Scheduled", desc: "3D Spatial Mechanics mock test starts in 2 hours", time: "10m ago", unread: true },
-    { id: 2, title: "Weekly Goal Met!", desc: "You have completed 84 questions this week", time: "1h ago", unread: false },
-    { id: 3, title: "New Solved PYQ Paper", desc: "JEE Advanced 2024 Paper 1 solutions uploaded", time: "1d ago", unread: false }
+    { id: 1, title: "Exam Scheduled", desc: "IIT-JEE Mechanics Full Mock Test starts at 3:00 PM", time: "10m ago", unread: true },
+    { id: 2, title: "Weekly Goal Met!", desc: "You have completed 84 practice questions this week", time: "1h ago", unread: false },
+    { id: 3, title: "New Solved PYQ Added", desc: "UGC-NET Paper 1 & CBSE 2024 solutions published", time: "1d ago", unread: false }
   ];
+
+  const handleSelectCourse = (courseId) => {
+    StorageService.setActiveCourse(courseId);
+    if (onCourseChange) onCourseChange(courseId);
+    setShowCourseMenu(false);
+  };
 
   return (
     <header className="app-header">
@@ -66,7 +100,41 @@ export default function Header({ user, onNavigate, onOpenMobileMenu }) {
         </div>
       </div>
 
-      {/* Search Bar matching screenshot */}
+      {/* Global Course Switcher Pill */}
+      <div className="header-course-switcher-wrapper">
+        <button
+          className="header-course-pill-btn"
+          id="btn-switch-course"
+          onClick={() => setShowCourseMenu(!showCourseMenu)}
+        >
+          <GraduationCap size={16} />
+          <span className="course-pill-label">{currentCourse.name}</span>
+          <ChevronDown size={14} />
+        </button>
+
+        {showCourseMenu && (
+          <div className="course-dropdown-popover fade-in">
+            <div className="course-dropdown-header">
+              <span>Switch Curriculum Track</span>
+            </div>
+            {courses.map((c) => (
+              <button
+                key={c.id}
+                className={`course-dropdown-item ${c.id === currentCourse.id ? "active" : ""}`}
+                onClick={() => handleSelectCourse(c.id)}
+              >
+                <div className="course-item-title-row">
+                  <strong>{c.name}</strong>
+                  <span className="badge badge-navy badge-sm">{c.badge}</span>
+                </div>
+                <span className="course-item-desc">{c.description}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Global Search Bar (Module A Search Engine) */}
       <div className={`header-search-container ${isMobileSearchExpanded ? "mobile-expanded" : ""}`}>
         <div className="search-input-wrapper">
           <Search size={18} className="search-icon" />
@@ -74,7 +142,7 @@ export default function Header({ user, onNavigate, onOpenMobileMenu }) {
             type="text"
             id="global-search-input"
             className="search-input"
-            placeholder="Search exam, topic, question..."
+            placeholder="Search scientific terms, notes, PYQs, formulas..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsMobileSearchExpanded(true)}
@@ -97,13 +165,44 @@ export default function Header({ user, onNavigate, onOpenMobileMenu }) {
           )}
         </div>
 
-        {/* Live Search Quick Results Modal */}
+        {/* Global Multi-Index Search Dropdown */}
         {searchQuery.trim().length > 1 && (
           <div className="search-results-dropdown fade-in">
+            {/* 1. Scientific & Technical Terminology */}
+            {matchingTerms.length > 0 && (
+              <div className="search-results-section">
+                <span className="search-section-label">
+                  <Sparkles size={13} style={{ marginRight: 4 }} />
+                  Scientific Terminology ({matchingTerms.length})
+                </span>
+                {matchingTerms.map(term => (
+                  <div
+                    key={term.id}
+                    className="search-result-item term-item"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setIsMobileSearchExpanded(false);
+                      if (onSelectTerm) onSelectTerm(term.id);
+                    }}
+                  >
+                    <Sparkles size={15} className="result-icon-lime" />
+                    <div className="result-text-col">
+                      <span className="result-title">
+                        {term.term} {term.hindiTerm && `(${term.hindiTerm})`}
+                      </span>
+                      <span className="result-meta">{term.category} • Tap for instant definition</span>
+                    </div>
+                    <ArrowUpRight size={14} className="result-arrow" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 2. Questions */}
             <div className="search-results-section">
-              <span className="search-section-label">Questions ({matchingQuestions.length})</span>
-              {matchingQuestions.length === 0 ? (
-                <div className="search-empty">No matching questions</div>
+              <span className="search-section-label">Practice Questions ({matchingQuestions.length})</span>
+              {matchingQuestions.length === 0 && matchingTerms.length === 0 ? (
+                <div className="search-empty">No exact match found. Try another concept.</div>
               ) : (
                 matchingQuestions.map(q => (
                   <div
@@ -126,12 +225,11 @@ export default function Header({ user, onNavigate, onOpenMobileMenu }) {
               )}
             </div>
 
-            <div className="search-results-section">
-              <span className="search-section-label">Previous Year Papers ({matchingPapers.length})</span>
-              {matchingPapers.length === 0 ? (
-                <div className="search-empty">No matching papers</div>
-              ) : (
-                matchingPapers.map(p => (
+            {/* 3. Previous Year Papers */}
+            {matchingPapers.length > 0 && (
+              <div className="search-results-section">
+                <span className="search-section-label">Exam Papers ({matchingPapers.length})</span>
+                {matchingPapers.map(p => (
                   <div
                     key={p.id}
                     className="search-result-item"
@@ -148,9 +246,9 @@ export default function Header({ user, onNavigate, onOpenMobileMenu }) {
                     </div>
                     <ArrowUpRight size={14} className="result-arrow" />
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
