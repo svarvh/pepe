@@ -19,10 +19,11 @@ import {
   RotateCcw,
   ShieldCheck,
   CheckCircle2,
-  HelpCircle
+  HelpCircle,
+  Globe
 } from "lucide-react";
 
-export default function Sidebar({ currentRoute, onNavigate, onLogout, isMobileOpen, onCloseMobile }) {
+export default function Sidebar({ currentRoute, onNavigate, onLogout, onGoHome, isMobileOpen, onCloseMobile }) {
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "smart-notes", label: "Smart Notes & Terms", icon: BookOpen, badge: "Module A" },
@@ -84,7 +85,12 @@ export default function Sidebar({ currentRoute, onNavigate, onLogout, isMobileOp
       <aside className={`app-sidebar ${isMobileOpen ? "mobile-drawer-open" : ""}`}>
         {/* Brand Header */}
         <div className="sidebar-brand">
-          <div className="brand-logo-wrap">
+          <div
+            className="brand-logo-wrap"
+            onClick={onGoHome}
+            style={{ cursor: "pointer" }}
+            title="Return to main public homepage"
+          >
             <svg className="brand-logo-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="36" height="36" rx="10" fill="#292840" />
               <path
@@ -142,6 +148,22 @@ export default function Sidebar({ currentRoute, onNavigate, onLogout, isMobileOp
 
         {/* Sidebar Footer */}
         <div className="sidebar-footer">
+          {onGoHome && (
+            <button
+              className="logout-btn btn-back-home"
+              onClick={() => {
+                if (onCloseMobile) onCloseMobile();
+                onGoHome();
+              }}
+              style={{ marginBottom: 8 }}
+            >
+              <div className="logout-icon-circle">
+                <Globe size={16} strokeWidth={2.2} />
+              </div>
+              <span>Back to Homepage</span>
+            </button>
+          )}
+
           <button
             className="logout-btn"
             id="btn-logout"

@@ -30,6 +30,8 @@ import LaunchChecklistView from "./LaunchChecklistView";
 export default function AdminPanel({
   currentUser,
   onNavigateToStudent,
+  onNavigateToHome,
+  onNavigateToFaculty,
   onAdminLogout
 }) {
   const [activeAdminTab, setActiveAdminTab] = useState("admin-overview");
@@ -258,6 +260,24 @@ export default function AdminPanel({
         </nav>
 
         <div className="admin-sidebar-footer">
+          <button
+            onClick={onNavigateToHome}
+            className="btn-switch-to-student"
+            title="Return to main public homepage"
+          >
+            <ExternalLink size={15} />
+            <span>Back to Homepage</span>
+          </button>
+
+          <button
+            onClick={onNavigateToFaculty}
+            className="btn-switch-to-student"
+            title="Open Faculty Management Panel"
+          >
+            <BookOpen size={15} />
+            <span>View Faculty Panel</span>
+          </button>
+
           <button
             onClick={onNavigateToStudent}
             className="btn-switch-to-student"

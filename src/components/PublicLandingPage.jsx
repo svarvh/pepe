@@ -62,6 +62,12 @@ export default function PublicLandingPage({
             <button onClick={() => scrollToSection("why-caplen")} className="landing-nav-link">
               Why Caplen
             </button>
+            <button onClick={onGoToFaculty} className="landing-nav-link" title="Open Faculty Panel (/faculty)">
+              Faculty
+            </button>
+            <button onClick={onGoToAdmin} className="landing-nav-link" title="Open Admin Control Panel (/admin)">
+              Admin
+            </button>
           </nav>
 
           <div className="landing-header-actions">
@@ -566,9 +572,9 @@ export default function PublicLandingPage({
             <ul className="footer-links">
               <li><button onClick={() => scrollToSection("features")}>About Caplen</button></li>
               <li><button onClick={() => scrollToSection("how-it-works")}>How It Works</button></li>
-              <li><button onClick={() => onOpenAuth("login")}>Student Login</button></li>
-              <li><button onClick={() => onOpenAuth("faculty-login")}>Faculty Portal</button></li>
-              <li><button onClick={() => onOpenAuth("admin-login")}>Admin Portal</button></li>
+              <li><button onClick={() => onGoToDashboard ? onGoToDashboard() : onOpenAuth("login")}>Student Portal (/dashboard)</button></li>
+              <li><button onClick={() => onGoToFaculty ? onGoToFaculty() : onOpenAuth("faculty-login")}>Faculty Portal (/faculty)</button></li>
+              <li><button onClick={() => onGoToAdmin ? onGoToAdmin() : onOpenAuth("admin-login")}>Admin Portal (/admin)</button></li>
               <li><a href="#privacy" onClick={(e) => { e.preventDefault(); alert("Caplen Privacy Policy: Student privacy is strictly protected. No third-party data selling."); }}>Privacy Policy</a></li>
               <li><a href="#terms" onClick={(e) => { e.preventDefault(); alert("Caplen Terms: Free educational platform for student learning and exam preparation."); }}>Terms & Conditions</a></li>
             </ul>

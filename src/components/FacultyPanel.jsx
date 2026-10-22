@@ -46,7 +46,12 @@ import { AuthService, ROLES } from "../services/authService";
 import { AIService } from "../services/aiService";
 import { DocumentParser } from "../services/documentParser";
 
-export default function FacultyPanel({ currentUser, onNavigateToStudent, onFacultyLogout }) {
+export default function FacultyPanel({
+  currentUser,
+  onNavigateToStudent,
+  onNavigateToHome,
+  onFacultyLogout
+}) {
   // Navigation tab state (11 core sections)
   const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'materials', 'upload', 'ai-gen', 'questions', 'builder', 'import-paper', 'topics', 'classes', 'published', 'settings'
 
@@ -664,6 +669,15 @@ Chapter Summary & High-Yield Examination Points:
 
         {/* Sidebar Footer */}
         <div className="admin-sidebar-footer">
+          <button
+            onClick={onNavigateToHome}
+            className="btn-switch-to-student"
+            title="Return to main public homepage"
+          >
+            <ExternalLink size={15} />
+            <span>Back to Homepage</span>
+          </button>
+
           <button
             onClick={onNavigateToStudent}
             className="btn-switch-to-student"

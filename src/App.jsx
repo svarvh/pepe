@@ -105,7 +105,7 @@ export default function App() {
       return;
     }
 
-    if (path.startsWith("/app") || path.startsWith("/dashboard") || hash === "#app" || hash === "#dashboard") {
+    if (path.startsWith("/app") || path.startsWith("/dashboard") || path.startsWith("/student") || hash === "#app" || hash === "#dashboard" || hash === "#student") {
       if (!activeUsr) {
         setTopLevelView("public");
         setAuthModalMode("login");
@@ -121,18 +121,8 @@ export default function App() {
       return;
     }
 
-    // Default root path: show public landing page for new visitors or student/faculty/admin dashboard for logged-in users
-    if (activeUsr) {
-      if (activeUsr.role === ROLES.ADMIN) {
-        setTopLevelView("admin");
-      } else if (activeUsr.role === ROLES.FACULTY) {
-        setTopLevelView("faculty");
-      } else {
-        setTopLevelView("student");
-      }
-    } else {
-      setTopLevelView("public");
-    }
+    // Default root path (/ or /home): The main website URL ALWAYS shows the Public Landing Homepage that we created!
+    setTopLevelView("public");
   }, []);
 
   // Initialize storage, auth, and routing
@@ -360,6 +350,7 @@ export default function App() {
             setTopLevelView("student");
             window.history.pushState({}, "", "/dashboard");
           }}
+          onNavigateToHome={handleGoToPublic}
           onFacultyLogout={handleLogout}
         />
       )}
@@ -372,6 +363,8 @@ export default function App() {
             setTopLevelView("student");
             window.history.pushState({}, "", "/dashboard");
           }}
+          onNavigateToHome={handleGoToPublic}
+          onNavigateToFaculty={handleGoToFaculty}
           onAdminLogout={handleLogout}
         />
       )}
@@ -384,6 +377,7 @@ export default function App() {
             currentRoute={currentRoute}
             onNavigate={handleNavigate}
             onLogout={handleLogout}
+            onGoHome={handleGoToPublic}
             isMobileOpen={isMobileMenuOpen}
             onCloseMobile={() => setIsMobileMenuOpen(false)}
           />
