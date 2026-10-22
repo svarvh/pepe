@@ -32,9 +32,21 @@
   --radius-full: 9999px;
 }
 
+.caplen-app-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-white);
+  overflow-x: hidden;
+}
+
 /* Base Landing Page Container */
 .landing-page-root {
+  width: 100%;
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
   background-color: var(--color-white);
   color: var(--color-slate-800);
   font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

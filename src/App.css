@@ -3701,16 +3701,16 @@
 /* Tablet & Smaller Laptops (768px - 1023px) */
 @media (max-width: 1023px) {
   #root {
-    padding: 12px;
+    padding: 0;
   }
 
   .app-container {
-    border-radius: var(--radius-card);
-    min-height: calc(100vh - 24px);
+    border-radius: 0;
+    min-height: 100vh;
   }
 
   .main-content-layout {
-    height: calc(100vh - 24px);
+    height: 100vh;
   }
 
   /* Transform Sidebar into Slide-out Drawer */
