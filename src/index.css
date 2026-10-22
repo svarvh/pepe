@@ -4,57 +4,65 @@
    ========================================================================== */
 
 :root {
-  /* Strict Palette from Reference Screenshots */
-  --bg-outer: #B1BDD8;            /* Soft lavender-blue outer wrapper */
-  --bg-main: #F5F5F7;             /* Warm off-white application surface */
+  /* Green & White Master Brand Tokens (Matching Public Landing Page) */
+  --bg-outer: #E6F4EA;            /* Soft mint/green-tinted wrapper */
+  --bg-main: #F8FAFC;             /* Clean crisp off-white surface */
   --bg-card: #FFFFFF;             /* Crisp white card background */
-  --bg-sidebar: #F7F7FA;          /* Subtle light sidebar surface */
+  --bg-sidebar: #FFFFFF;          /* Pure white sidebar surface */
   
-  /* Feature Dark Navy-Purple Surfaces */
-  --navy-dark: #292840;           /* Deep navy-purple banner & key accents */
-  --navy-deep: #1E1D30;           /* Deeper navy for badge icons & tooltips */
-  --navy-card-border: rgba(255, 255, 255, 0.08);
+  /* Primary Green Brand Palette */
+  --color-green-primary: #10b981;
+  --color-green-dark: #059669;
+  --color-green-deep: #064e3b;
+  --color-green-light: #d1fae5;
+  --color-green-soft: #f0fdf4;
+  --color-green-mint: #ecfdf5;
 
-  /* Signature Pastel Accents */
-  --pastel-lavender: #BDA3FA;     /* Card 01 - Pastel purple */
-  --pastel-lavender-light: #F0EBFC;
-  --pastel-lavender-dark: #7445D4;
+  /* Feature Green-Forest Surfaces (replacing old navy-purple) */
+  --navy-dark: #064e3b;           /* Rich deep forest green banner & key accents */
+  --navy-deep: #022c22;           /* Deepest forest green */
+  --navy-card-border: rgba(16, 185, 129, 0.15);
 
-  --pastel-cream: #FFE8C2;        /* Card 02 - Pastel warm cream/peach */
-  --pastel-cream-light: #FFF7EC;
-  --pastel-cream-dark: #B87820;
+  /* Signature Accents - Harmonized with Green theme */
+  --pastel-lavender: #ffffff;     /* Card 01 - Clean crisp white card */
+  --pastel-lavender-light: #ecfdf5;
+  --pastel-lavender-dark: #047857;
 
-  --lime-yellow: #E7FA4B;         /* Card 03 - Electric bright lime-yellow */
-  --lime-yellow-dark: #4F5605;
-  --lime-yellow-glow: rgba(231, 250, 75, 0.35);
+  --pastel-cream: #ecfdf5;        /* Card 02 - Soft mint card */
+  --pastel-cream-light: #f0fdf4;
+  --pastel-cream-dark: #065f46;
+
+  --lime-yellow: #d1fae5;         /* Card 03 - Light emerald card */
+  --lime-yellow-dark: #064e3b;
+  --lime-yellow-glow: rgba(16, 185, 129, 0.35);
 
   /* Typography Colors */
-  --text-primary: #202638;        /* High-contrast dark navy body and titles */
-  --text-secondary: #747680;      /* Muted slate grey for secondary metadata */
-  --text-muted: #9DA0AE;          /* Light grey for placeholders & subtle labels */
-  --text-inverse: #FFFFFF;        /* White text for dark banners */
+  --text-primary: #0f172a;        /* High-contrast slate 900 body and titles */
+  --text-secondary: #475569;      /* Slate 600 for secondary metadata */
+  --text-muted: #94a3b8;          /* Slate 400 for placeholders */
+  --text-inverse: #FFFFFF;        /* Crisp white text for banners */
 
   /* Borders & Dividers */
-  --border-subtle: #E8E9ED;       /* Divider lines & minimal borders */
-  --border-light: rgba(0, 0, 0, 0.05);
+  --border-subtle: #e2e8f0;       /* Divider lines & minimal borders */
+  --border-light: rgba(16, 185, 129, 0.08);
 
-  /* Functional / Semantic Colors (Subtle & Restrained to protect theme) */
-  --semantic-success-bg: #E8F8EE;
-  --semantic-success-text: #197B3E;
-  --semantic-success-border: #99E2B4;
+  /* Functional / Semantic Colors */
+  --semantic-success-bg: #ecfdf5;
+  --semantic-success-text: #047857;
+  --semantic-success-border: #a7f3d0;
 
-  --semantic-error-bg: #FEEEEE;
-  --semantic-error-text: #BA2525;
-  --semantic-error-border: #F7B5B5;
+  --semantic-error-bg: #fef2f2;
+  --semantic-error-text: #b91c1c;
+  --semantic-error-border: #fca5a5;
 
-  --semantic-warning-bg: #FFF8E6;
-  --semantic-warning-text: #A16207;
+  --semantic-warning-bg: #fffbeb;
+  --semantic-warning-text: #b45309;
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(32, 38, 56, 0.04);
-  --shadow-md: 0 8px 24px rgba(32, 38, 56, 0.06);
-  --shadow-lg: 0 16px 36px rgba(32, 38, 56, 0.09);
-  --shadow-app: 0 25px 60px -15px rgba(41, 40, 64, 0.22);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 16px 36px rgba(16, 185, 129, 0.12);
+  --shadow-app: 0 25px 60px -15px rgba(6, 78, 59, 0.2);
 
   /* Border Radii */
   --radius-outer: 32px;
@@ -197,13 +205,15 @@ button:focus-visible {
 }
 
 .pill-btn-lime {
-  background-color: var(--lime-yellow);
-  color: var(--navy-dark);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #FFFFFF;
   font-weight: 800;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
 }
 .pill-btn-lime:hover {
-  filter: brightness(0.97);
+  filter: brightness(1.05);
   transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
 }
 
 /* Badges */
@@ -213,26 +223,29 @@ button:focus-visible {
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .badge-lavender {
-  background-color: var(--pastel-lavender-light);
-  color: var(--pastel-lavender-dark);
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
 }
 
 .badge-cream {
-  background-color: var(--pastel-cream-light);
-  color: var(--pastel-cream-dark);
+  background-color: #f0fdf4;
+  color: #065f46;
+  border: 1px solid #d1fae5;
 }
 
 .badge-lime {
-  background-color: #F8FDCB;
-  color: var(--lime-yellow-dark);
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
 }
 
 .badge-navy {
-  background-color: var(--navy-dark);
+  background-color: #064e3b;
   color: #FFFFFF;
 }
 

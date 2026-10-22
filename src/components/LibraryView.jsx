@@ -146,7 +146,7 @@ export default function LibraryView({ onStartPracticeWithCustom, onNavigate }) {
                       window.location.reload();
                     }}
                   >
-                    <Bookmark size={16} fill="#BDA3FA" stroke="#292840" />
+                    <Bookmark size={16} fill="#10b981" stroke="#064e3b" />
                   </button>
                 </div>
                 <p className="bookmark-q-text">{q.text}</p>

@@ -326,7 +326,7 @@ export default function PracticeView({ initialSubject, initialQuestions, onSessi
                 title="Bookmark Question"
                 onClick={() => handleToggleBookmark(currentQ.id)}
               >
-                <Bookmark size={16} fill={isBookmarked ? "#BDA3FA" : "none"} stroke="#292840" />
+                <Bookmark size={16} fill={isBookmarked ? "#10b981" : "none"} stroke="#064e3b" />
                 <span>{isBookmarked ? "Bookmarked" : "Bookmark"}</span>
               </button>
 

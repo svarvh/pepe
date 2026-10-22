@@ -228,8 +228,8 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
                   <svg viewBox="0 0 160 55" className="stat-wave-svg" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#BDA3FA" stopOpacity="0.45" />
-                        <stop offset="100%" stopColor="#BDA3FA" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.38" />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
                     <path
@@ -239,8 +239,8 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
                     <path
                       d="M0,35 Q20,10 40,28 T80,18 T120,40 T160,20"
                       fill="none"
-                      stroke="#A583F8"
-                      strokeWidth="2.5"
+                      stroke="#059669"
+                      strokeWidth="2.8"
                       strokeLinecap="round"
                     />
                   </svg>
@@ -423,8 +423,8 @@ export default function DashboardView({ user, statistics, onNavigate, onStartPra
               style={{ marginTop: 12 }}
               onClick={() => onNavigate("topics")}
             >
-              <div className="upcoming-icon-dark" style={{ backgroundColor: "#292840" }}>
-                <Layers size={20} style={{ color: "#BDA3FA" }} />
+              <div className="upcoming-icon-dark" style={{ backgroundColor: "#064e3b" }}>
+                <Layers size={20} style={{ color: "#34d399" }} />
               </div>
               <div className="upcoming-info">
                 <span className="upcoming-time">Tomorrow • 14:00</span>

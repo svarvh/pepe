@@ -90,21 +90,9 @@ export default function Header({
         </button>
 
         <div className="header-mobile-brand" onClick={() => onNavigate("dashboard")}>
-          <svg className="mobile-brand-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="36" height="36" rx="9" fill="#292840" />
-            <path
-              d="M18 9C13.0294 9 9 13.0294 9 18C9 22.9706 13.0294 27 18 27C21.9864 27 25.3377 24.4109 26.5 20.8"
-              stroke="#E7FA4B"
-              strokeWidth="2.8"
-              strokeLinecap="round"
-            />
-            <path
-              d="M18 13.5C15.5147 13.5 13.5 15.5147 13.5 18C13.5 20.4853 15.5147 22.5 18 22.5C19.7891 22.5 21.3262 21.4554 22.02 19.95"
-              stroke="#BDA3FA"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <div className="landing-logo-icon" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }}>
+            <GraduationCap size={18} strokeWidth={2.4} color="#ffffff" />
+          </div>
           <span className="mobile-brand-title">Caplen</span>
         </div>
       </div>

@@ -20,7 +20,8 @@ import {
   ShieldCheck,
   CheckCircle2,
   HelpCircle,
-  Globe
+  Globe,
+  GraduationCap
 } from "lucide-react";
 
 export default function Sidebar({ currentRoute, onNavigate, onLogout, onGoHome, isMobileOpen, onCloseMobile }) {
@@ -91,24 +92,12 @@ export default function Sidebar({ currentRoute, onNavigate, onLogout, onGoHome, 
             style={{ cursor: "pointer" }}
             title="Return to main public homepage"
           >
-            <svg className="brand-logo-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="36" height="36" rx="10" fill="#292840" />
-              <path
-                d="M18 9C13.0294 9 9 13.0294 9 18C9 22.9706 13.0294 27 18 27C21.9864 27 25.3377 24.4109 26.5 20.8"
-                stroke="#E7FA4B"
-                strokeWidth="2.8"
-                strokeLinecap="round"
-              />
-              <path
-                d="M18 13.5C15.5147 13.5 13.5 15.5147 13.5 18C13.5 20.4853 15.5147 22.5 18 22.5C19.7891 22.5 21.3262 21.4554 22.02 19.95"
-                stroke="#BDA3FA"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <div className="landing-logo-icon" style={{ width: 38, height: 38, borderRadius: 11, flexShrink: 0 }}>
+              <GraduationCap size={22} strokeWidth={2.4} color="#ffffff" />
+            </div>
             <div className="brand-text-col">
               <span className="brand-name">Caplen</span>
-              <span className="brand-tagline">EXAM PREP</span>
+              <span className="brand-tagline" style={{ color: "#059669" }}>EXAM PREP</span>
             </div>
           </div>
 
