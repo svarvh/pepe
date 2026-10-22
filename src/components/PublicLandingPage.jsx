@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   GraduationCap,
   Sparkles,
@@ -10,15 +10,9 @@ import {
   Sliders,
   PenTool,
   UploadCloud,
-  ChevronRight,
-  Flame,
-  Award,
   Layers,
-  HelpCircle,
-  Volume2,
-  Clock,
-  Shield,
-  Users,
+  ShieldCheck,
+  RotateCcw,
   Compass,
   Check
 } from "lucide-react";
@@ -32,30 +26,6 @@ export default function PublicLandingPage({
   onGoToDashboard,
   onGoToAdmin
 }) {
-  const [selectedGoal, setSelectedGoal] = useState("class11_12");
-  const [demoSelectedChoice, setDemoSelectedChoice] = useState(null);
-  const [hasAnsweredDemo, setHasAnsweredDemo] = useState(false);
-
-  const demoQuestion = {
-    badge: "Class 12 Biology • Evolution & Genetics",
-    type: "Assertion-Reason",
-    assertion: "In post-industrial England, melanic (dark) forms of Biston betularia survived in higher proportions than light-colored forms on tree trunks.",
-    reason: "Industrial soot blackened lichen-covered tree trunks, conferring camouflaged survival advantage against predatory birds (directional selection).",
-    options: [
-      { id: "A", text: "Both (A) and (R) are true, and (R) is the correct explanation of (A)." },
-      { id: "B", text: "Both (A) and (R) are true, but (R) is NOT the correct explanation of (A)." },
-      { id: "C", text: "(A) is true, but (R) is false." },
-      { id: "D", text: "(A) is false, but (R) is true." }
-    ],
-    correctOption: "A",
-    explanation: "Correct! Industrial melanism is a classic real-world demonstration of natural selection. Lichens died from sulfur dioxide pollution, so darker moths were cryptic against predatory birds."
-  };
-
-  const handleDemoSelect = (choiceId) => {
-    setDemoSelectedChoice(choiceId);
-    setHasAnsweredDemo(true);
-  };
-
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -142,7 +112,7 @@ export default function PublicLandingPage({
               <span>All-In-One Digital Learning Ecosystem</span>
             </div>
 
-            <h1 className="hero-headline">
+            <h1 className="landing-hero-headline">
               Study Smarter. <br />
               <span className="text-gradient-green">Score Better.</span>
             </h1>
@@ -187,7 +157,7 @@ export default function PublicLandingPage({
             </div>
           </div>
 
-          {/* Right Column: Hero Visual Artwork + Live Question Preview */}
+          {/* Right Column: Hero Visual Artwork & Platform Showcase (NO exam question on homepage) */}
           <div className="landing-hero-visual-card">
             <div className="hero-image-wrap">
               <img
@@ -209,59 +179,55 @@ export default function PublicLandingPage({
                   <span>Bilingual Audio & Terms</span>
                 </div>
               </div>
+              <div className="hero-floating-pill-3">
+                <ShieldCheck size={16} className="text-emerald" />
+                <div>
+                  <strong>100% Verified</strong>
+                  <span>NCERT & Boards Aligned</span>
+                </div>
+              </div>
             </div>
 
-            {/* Interactive Live Question Preview Card */}
-            <div className="hero-live-demo-card">
-              <div className="demo-card-header">
-                <div className="demo-pill-badge">{demoQuestion.badge}</div>
-                <div className="demo-format-pill">{demoQuestion.type}</div>
+            {/* Platform Feature Highlight Strip (Replaces the question preview) */}
+            <div className="hero-platform-showcase-card">
+              <div className="showcase-card-header">
+                <div className="showcase-pill-title">STUDENT LEARNING ECOSYSTEM</div>
+                <span className="showcase-subtitle">4 Academic Tracks • 10+ Question Types</span>
               </div>
 
-              <div className="demo-stem-box">
-                <p><strong>Assertion (A):</strong> {demoQuestion.assertion}</p>
-                <p><strong>Reason (R):</strong> {demoQuestion.reason}</p>
-              </div>
-
-              <div className="demo-options-list">
-                {demoQuestion.options.map((opt) => {
-                  const isSelected = demoSelectedChoice === opt.id;
-                  const isCorrect = opt.id === demoQuestion.correctOption;
-                  let optionClass = "demo-option-btn";
-                  if (hasAnsweredDemo) {
-                    if (isCorrect) optionClass += " correct";
-                    else if (isSelected && !isCorrect) optionClass += " incorrect";
-                  }
-
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => handleDemoSelect(opt.id)}
-                      className={optionClass}
-                    >
-                      <span className="opt-letter">{opt.id}</span>
-                      <span className="opt-text">{opt.text}</span>
-                      {hasAnsweredDemo && isCorrect && <Check size={16} className="opt-check" />}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {hasAnsweredDemo && (
-                <div className="demo-feedback-box fade-in">
-                  <div className="demo-feedback-header">
-                    <CheckCircle2 size={16} className="text-emerald" />
-                    <strong>Verified NCERT Rationale</strong>
+              <div className="showcase-tracks-row">
+                <div className="showcase-track-item" onClick={() => onOpenAuth("register")}>
+                  <span className="track-number">01</span>
+                  <div>
+                    <strong>Class 9–10 Foundations</strong>
+                    <small>CBSE Science & Mathematics</small>
                   </div>
-                  <p>{demoQuestion.explanation}</p>
-                  <button
-                    onClick={() => onOpenAuth("register")}
-                    className="btn-demo-continue"
-                  >
-                    Solve 40+ More Questions Free <ChevronRight size={15} />
-                  </button>
                 </div>
-              )}
+
+                <div className="showcase-track-item" onClick={() => onOpenAuth("register")}>
+                  <span className="track-number">02</span>
+                  <div>
+                    <strong>Class 11–12 NCERT</strong>
+                    <small>Physics, Chemistry, Biology</small>
+                  </div>
+                </div>
+
+                <div className="showcase-track-item" onClick={() => onOpenAuth("register")}>
+                  <span className="track-number">03</span>
+                  <div>
+                    <strong>IIT-JEE Main & Adv</strong>
+                    <small>Mechanics, Electrodynamics & PYQs</small>
+                  </div>
+                </div>
+
+                <div className="showcase-track-item" onClick={() => onOpenAuth("register")}>
+                  <span className="track-number">04</span>
+                  <div>
+                    <strong>UGC-NET Paper 1 & 2</strong>
+                    <small>Research & Teaching Aptitude</small>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -279,39 +245,35 @@ export default function PublicLandingPage({
           </div>
 
           <div className="goals-grid">
-            {COURSES_CATALOG.map((course) => {
-              const isSelected = selectedGoal === course.id;
-              return (
-                <div
-                  key={course.id}
-                  onClick={() => setSelectedGoal(course.id)}
-                  className={`goal-card ${isSelected ? "active" : ""}`}
-                >
-                  <div className="goal-badge-strip">{course.examType}</div>
-                  <h3 className="goal-title">{course.name}</h3>
-                  <p className="goal-desc">{course.description}</p>
-                  <div className="goal-meta-row">
-                    <span className="meta-tag">{course.subjects?.length || 3} Subjects</span>
-                    <span className="meta-tag">Bilingual Notes</span>
-                    <span className="meta-tag">10+ Qs / Topic</span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onNavigateToCourse) {
-                        onNavigateToCourse(course.id);
-                      } else {
-                        onOpenAuth("register");
-                      }
-                    }}
-                    className="goal-action-btn"
-                  >
-                    <span>Start Preparing</span>
-                    <ArrowRight size={15} />
-                  </button>
+            {COURSES_CATALOG.map((course) => (
+              <div
+                key={course.id}
+                className="goal-card"
+                onClick={() => {
+                  if (onNavigateToCourse) {
+                    onNavigateToCourse(course.id);
+                  } else {
+                    onOpenAuth("register");
+                  }
+                }}
+              >
+                <div className="goal-badge-strip">{course.examType}</div>
+                <h3 className="goal-title">{course.name}</h3>
+                <p className="goal-desc">{course.description}</p>
+                <div className="goal-meta-row">
+                  <span className="meta-tag">{course.subjects?.length || 3} Subjects</span>
+                  <span className="meta-tag">Bilingual Notes</span>
+                  <span className="meta-tag">10+ Qs / Topic</span>
                 </div>
-              );
-            })}
+                <button
+                  type="button"
+                  className="goal-action-btn"
+                >
+                  <span>Start Preparing</span>
+                  <ArrowRight size={15} />
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -471,77 +433,79 @@ export default function PublicLandingPage({
 
       {/* 6. Student-Focused Motivational Section */}
       <section id="why-caplen" className="landing-motivation-section">
-        <div className="landing-container motivation-card">
-          <div className="motivation-grid">
-            <div className="motivation-content">
-              <span className="motivation-tag">BUILT SPECIFICALLY FOR STUDENTS</span>
-              <h2 className="motivation-title">
-                Zero distractions. <br />
-                Maximum retention.
-              </h2>
-              <p className="motivation-text">
-                Traditional exam preparation is fragmented across multiple tabs, bulky textbooks, confusing forums, and unverified answer keys.
-              </p>
-              <p className="motivation-text">
-                Caplen unifies your syllabus into a focused, distraction-free environment where every question is verified, every scientific term has a one-click definition, and every mistake turns into an automatic revision flashcard.
-              </p>
-
-              <div className="motivation-points">
-                <div className="point-item">
-                  <CheckCircle2 size={18} className="text-emerald" />
-                  <span>No paywalls or credit cards required to start practicing</span>
-                </div>
-                <div className="point-item">
-                  <CheckCircle2 size={18} className="text-emerald" />
-                  <span>Real step-by-step solutions for all answer options</span>
-                </div>
-                <div className="point-item">
-                  <CheckCircle2 size={18} className="text-emerald" />
-                  <span>Spaced repetition algorithm ensures you never repeat mistakes</span>
-                </div>
-              </div>
-
-              <div className="motivation-cta-wrap">
-                <button
-                  onClick={() => onOpenAuth("register")}
-                  className="btn-hero-cta"
-                >
-                  Create Free Student Account <ArrowRight size={18} />
-                </button>
-              </div>
-            </div>
-
-            <div className="motivation-side-box">
-              <div className="quote-box">
-                <div className="quote-stars">★★★★★</div>
-                <p className="quote-body">
-                  "Having the terminology drawer right inside my notes changed everything for Class 12 Biology and Electrochemistry. I never have to leave the app to Google concepts."
+        <div className="landing-container">
+          <div className="motivation-card">
+            <div className="motivation-grid">
+              <div className="motivation-content">
+                <span className="motivation-tag">BUILT SPECIFICALLY FOR STUDENTS</span>
+                <h2 className="motivation-title">
+                  Zero distractions. <br />
+                  Maximum retention.
+                </h2>
+                <p className="motivation-text">
+                  Traditional exam preparation is fragmented across multiple tabs, bulky textbooks, confusing forums, and unverified answer keys.
                 </p>
-                <div className="quote-author">
-                  <div className="author-avatar-chip">AV</div>
-                  <div>
-                    <strong>Alyssa Vance</strong>
-                    <span>Class 12 CBSE & Pre-Med Aspirant</span>
+                <p className="motivation-text">
+                  Caplen unifies your syllabus into a focused, distraction-free environment where every question is verified, every scientific term has a one-click definition, and every mistake turns into an automatic revision flashcard.
+                </p>
+
+                <div className="motivation-points">
+                  <div className="point-item">
+                    <CheckCircle2 size={18} className="text-emerald" />
+                    <span>No paywalls or credit cards required to start practicing</span>
+                  </div>
+                  <div className="point-item">
+                    <CheckCircle2 size={18} className="text-emerald" />
+                    <span>Real step-by-step solutions for all answer options</span>
+                  </div>
+                  <div className="point-item">
+                    <CheckCircle2 size={18} className="text-emerald" />
+                    <span>Spaced repetition algorithm ensures you never repeat mistakes</span>
                   </div>
                 </div>
+
+                <div className="motivation-cta-wrap">
+                  <button
+                    onClick={() => onOpenAuth("register")}
+                    className="btn-hero-cta"
+                  >
+                    Create Free Student Account <ArrowRight size={18} />
+                  </button>
+                </div>
               </div>
 
-              <div className="mini-stats-grid">
-                <div className="mini-stat-item">
-                  <span className="stat-num">4</span>
-                  <span className="stat-lbl">Curriculum Tracks</span>
+              <div className="motivation-side-box">
+                <div className="quote-box">
+                  <div className="quote-stars">★★★★★</div>
+                  <p className="quote-body">
+                    "Having the terminology drawer right inside my notes changed everything for Class 12 Biology and Electrochemistry. I never have to leave the app to Google concepts."
+                  </p>
+                  <div className="quote-author">
+                    <div className="author-avatar-chip">AV</div>
+                    <div>
+                      <strong>Alyssa Vance</strong>
+                      <span>Class 12 CBSE & Pre-Med Aspirant</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="mini-stat-item">
-                  <span className="stat-num">40+</span>
-                  <span className="stat-lbl">Validated Questions</span>
-                </div>
-                <div className="mini-stat-item">
-                  <span className="stat-num">100%</span>
-                  <span className="stat-lbl">NCERT Grounded</span>
-                </div>
-                <div className="mini-stat-item">
-                  <span className="stat-num">0</span>
-                  <span className="stat-lbl">External Search Needed</span>
+
+                <div className="mini-stats-grid">
+                  <div className="mini-stat-item">
+                    <span className="stat-num">4</span>
+                    <span className="stat-lbl">Curriculum Tracks</span>
+                  </div>
+                  <div className="mini-stat-item">
+                    <span className="stat-num">40+</span>
+                    <span className="stat-lbl">Validated Questions</span>
+                  </div>
+                  <div className="mini-stat-item">
+                    <span className="stat-num">100%</span>
+                    <span className="stat-lbl">NCERT Grounded</span>
+                  </div>
+                  <div className="mini-stat-item">
+                    <span className="stat-num">0</span>
+                    <span className="stat-lbl">External Search Needed</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -549,7 +513,7 @@ export default function PublicLandingPage({
         </div>
       </section>
 
-      {/* 7. Clean Public Footer */}
+      {/* 7. Clean Public Footer (Green and White Theme - 100% High Contrast & Readable) */}
       <footer className="landing-footer">
         <div className="landing-container landing-footer-grid">
           <div className="footer-col brand-col">
@@ -592,7 +556,7 @@ export default function PublicLandingPage({
           </div>
 
           <div className="footer-col">
-            <h4 className="footer-heading">Platform</h4>
+            <h4 className="footer-heading">Platform & Access</h4>
             <ul className="footer-links">
               <li><button onClick={() => scrollToSection("features")}>About Caplen</button></li>
               <li><button onClick={() => scrollToSection("how-it-works")}>How It Works</button></li>
