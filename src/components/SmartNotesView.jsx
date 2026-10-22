@@ -18,7 +18,9 @@ import {
   FileText,
   Sliders,
   ExternalLink,
-  Target
+  Target,
+  Download,
+  X
 } from "lucide-react";
 import { StorageService } from "../services/storage";
 import TerminologyDrawer from "./TerminologyDrawer";
@@ -51,6 +53,14 @@ export default function SmartNotesView({ onNavigate, onStartPracticeWithTopic, o
 
   // Active Terminology Modal
   const [activeTermId, setActiveTermId] = useState(null);
+
+  // Faculty Published Notes for Students
+  const [facultyMaterials, setFacultyMaterials] = useState([]);
+  const [viewingFacultyPdf, setViewingFacultyPdf] = useState(null);
+
+  useEffect(() => {
+    setFacultyMaterials(StorageService.getPublishedFacultyResources());
+  }, []);
 
   // Sync course when prop changes
   useEffect(() => {
@@ -406,6 +416,86 @@ export default function SmartNotesView({ onNavigate, onStartPracticeWithTopic, o
             </button>
           </div>
 
+          {/* FACULTY UPLOADED NOTES & STUDY MATERIALS (If published by faculty for this chapter) */}
+          {facultyMaterials.filter(m =>
+            m.subjectId === selectedSubjectId ||
+            m.subject?.toLowerCase().includes(currentSubject?.name?.toLowerCase() || "") ||
+            (currentChapter?.title && m.chapter?.toLowerCase().includes(currentChapter?.title?.toLowerCase()))
+          ).length > 0 && (
+            <div className="faculty-notes-banner-card fade-in">
+              <div className="faculty-banner-header">
+                <div className="faculty-chip">
+                  <BookOpen size={14} className="text-emerald" />
+                  <span>Uploaded by Faculty: Prof. Sunita Rao (Senior HOD Sciences)</span>
+                </div>
+                <span className="curriculum-badge">Verified Board Reference</span>
+              </div>
+
+              {facultyMaterials
+                .filter(m =>
+                  m.subjectId === selectedSubjectId ||
+                  m.subject?.toLowerCase().includes(currentSubject?.name?.toLowerCase() || "") ||
+                  (currentChapter?.title && m.chapter?.toLowerCase().includes(currentChapter?.title?.toLowerCase()))
+                )
+                .slice(0, 2)
+                .map((facNote) => (
+                  <div key={facNote.id} className="faculty-note-subcard">
+                    <div className="faculty-note-info">
+                      <div className="faculty-note-title-row">
+                        <FileText size={18} className="text-emerald" />
+                        <strong>{facNote.title}</strong>
+                        <span className="badge-type">{facNote.resourceType}</span>
+                      </div>
+                      <p className="faculty-note-desc">{facNote.description}</p>
+                      <small className="faculty-note-meta">
+                        {facNote.fileName} • {facNote.fileSize} • {facNote.pageCount} Pages • Assigned to: {facNote.targetClasses?.join(", ")}
+                      </small>
+                    </div>
+
+                    <div className="faculty-note-actions">
+                      <button
+                        onClick={() => setViewingFacultyPdf(facNote)}
+                        className="btn-faculty-action preview"
+                      >
+                        <BookOpen size={14} /> Read PDF Notes
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          const blob = new Blob([facNote.extractedText], { type: "text/plain;charset=utf-8" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = facNote.fileName || "faculty_notes.txt";
+                          a.click();
+                          URL.revokeObjectURL(url);
+                        }}
+                        className="btn-faculty-action download"
+                      >
+                        <Download size={14} /> Download
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          const facQs = StorageService.getFacultyQuestions().filter(q =>
+                            q.source === "AI Generated From Faculty Material" || q.source === "Faculty Created"
+                          );
+                          if (onStartPracticeWithTopic) {
+                            onStartPracticeWithTopic(facQs.length > 0 ? facQs : null);
+                          } else {
+                            onNavigate("practice");
+                          }
+                        }}
+                        className="btn-faculty-action ai-practice"
+                      >
+                        <Sparkles size={14} /> AI Practice Drills
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+
           {/* Note Body Text with Clickable Terminology */}
           <article className="note-body-content">
             {language === "hi" && noteData.contentHi ? (
@@ -504,6 +594,52 @@ export default function SmartNotesView({ onNavigate, onStartPracticeWithTopic, o
             handleStartPracticingTopic();
           }}
         />
+      )}
+
+      {/* 4. FACULTY PDF VIEWER MODAL */}
+      {viewingFacultyPdf && (
+        <div className="auth-modal-overlay fade-in" onClick={() => setViewingFacultyPdf(null)}>
+          <div className="auth-modal-card pdf-viewer-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="auth-modal-header">
+              <div className="auth-brand-chip">
+                <BookOpen size={18} className="text-emerald" />
+                <span>{viewingFacultyPdf.title}</span>
+              </div>
+              <button onClick={() => setViewingFacultyPdf(null)} className="auth-close-btn">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="pdf-viewer-body">
+              <div className="pdf-viewer-header-info">
+                <span><strong>Uploaded by:</strong> {viewingFacultyPdf.ownerName} ({viewingFacultyPdf.ownerTitle})</span>
+                <span><strong>Class:</strong> {viewingFacultyPdf.classGrade} ({viewingFacultyPdf.subject})</span>
+                <span className="badge-lime">Faculty Approved</span>
+              </div>
+
+              <div className="pdf-viewer-content-box">
+                <pre>{viewingFacultyPdf.extractedText}</pre>
+              </div>
+
+              <div className="pdf-viewer-footer">
+                <button
+                  onClick={() => {
+                    const blob = new Blob([viewingFacultyPdf.extractedText], { type: "text/plain;charset=utf-8" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = viewingFacultyPdf.fileName || "study_material.txt";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="btn-admin-primary"
+                >
+                  <Download size={15} /> Download PDF Notes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

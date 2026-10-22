@@ -16,7 +16,24 @@ import {
 import { StorageService } from "../services/storage";
 
 export default function ImportantTopicsView({ onPracticeTopic, onNavigate }) {
-  const [topics, setTopics] = useState(StorageService.getTopics());
+  const standardTopics = StorageService.getTopics();
+  const publishedFacultyTopics = StorageService.getPublishedFacultyTopics().map(ft => ({
+    id: ft.id,
+    title: ft.title,
+    unit: ft.chapter || ft.subject,
+    subjectId: ft.subjectId || "bio",
+    priority: ft.priority || "High",
+    isFacultyCurated: true,
+    facultyReasoning: ft.facultyReasoning,
+    status: "in_progress",
+    weightage: "12-15% (Core Board)",
+    overview: ft.explanation || "Curated high-yield topic designated by faculty.",
+    formulas: ft.formulas || [],
+    keyPoints: ft.keyPoints || [],
+    estimatedHours: 2.5
+  }));
+
+  const [topics, setTopics] = useState([...publishedFacultyTopics, ...standardTopics]);
   const [search, setSearch] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [selectedPriority, setSelectedPriority] = useState("all");

@@ -24,6 +24,7 @@ export default function PublicLandingPage({
   onOpenAuth,
   onNavigateToCourse,
   onGoToDashboard,
+  onGoToFaculty,
   onGoToAdmin
 }) {
   const scrollToSection = (id) => {
@@ -69,10 +70,15 @@ export default function PublicLandingPage({
                 <span className="landing-user-greeting">
                   Signed in as <strong>{currentUser.name}</strong>
                   {currentUser.role === "admin" && <span className="admin-chip">Admin</span>}
+                  {currentUser.role === "faculty" && <span className="admin-chip faculty">Faculty</span>}
                 </span>
                 {currentUser.role === "admin" ? (
                   <button onClick={onGoToAdmin} className="btn-landing-primary">
                     Go to Admin Panel <ArrowRight size={16} />
+                  </button>
+                ) : currentUser.role === "faculty" ? (
+                  <button onClick={onGoToFaculty} className="btn-landing-primary">
+                    Go to Faculty Panel <ArrowRight size={16} />
                   </button>
                 ) : (
                   <button onClick={onGoToDashboard} className="btn-landing-primary">
@@ -561,7 +567,8 @@ export default function PublicLandingPage({
               <li><button onClick={() => scrollToSection("features")}>About Caplen</button></li>
               <li><button onClick={() => scrollToSection("how-it-works")}>How It Works</button></li>
               <li><button onClick={() => onOpenAuth("login")}>Student Login</button></li>
-              <li><button onClick={() => onOpenAuth("admin-login")}>Faculty & Admin Portal</button></li>
+              <li><button onClick={() => onOpenAuth("faculty-login")}>Faculty Portal</button></li>
+              <li><button onClick={() => onOpenAuth("admin-login")}>Admin Portal</button></li>
               <li><a href="#privacy" onClick={(e) => { e.preventDefault(); alert("Caplen Privacy Policy: Student privacy is strictly protected. No third-party data selling."); }}>Privacy Policy</a></li>
               <li><a href="#terms" onClick={(e) => { e.preventDefault(); alert("Caplen Terms: Free educational platform for student learning and exam preparation."); }}>Terms & Conditions</a></li>
             </ul>

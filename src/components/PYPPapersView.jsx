@@ -21,7 +21,29 @@ import {
 import { StorageService } from "../services/storage";
 
 export default function PYPPapersView({ onStartPracticeWithPaper, onNavigate }) {
-  const [papers, setPapers] = useState(StorageService.getPapers());
+  const standardPapers = StorageService.getPapers();
+  const publishedFacultyPapers = StorageService.getPublishedFacultyPapers().map(fp => ({
+    id: fp.id,
+    title: fp.title,
+    exam: fp.classGrade || "Class 12",
+    examId: fp.subjectId || "chem_12",
+    board: "Faculty Prepared Assessment",
+    subject: fp.subject,
+    subjectId: fp.subjectId,
+    year: "2026",
+    paperType: fp.examType || "Faculty Pre-Board Examination",
+    pages: Math.ceil((fp.questions?.length || 10) / 3),
+    questionsCount: fp.questions?.length || 10,
+    duration: `${fp.durationMinutes || 90} mins`,
+    solved: true,
+    hasAnswerKey: true,
+    isFacultyCreated: true,
+    ownerName: fp.ownerName || "Prof. Sunita Rao",
+    downloadUrl: "#",
+    summary: `Official assessment compiled by ${fp.ownerName || "Prof. Sunita Rao"}. Max Marks: ${fp.maxMarks}. Features combination of faculty problems and AI-grounded practice.`
+  }));
+
+  const [papers, setPapers] = useState([...publishedFacultyPapers, ...standardPapers]);
   const [search, setSearch] = useState("");
   const [examFilter, setExamFilter] = useState("all");
   const [subjectFilter, setSubjectFilter] = useState("all");

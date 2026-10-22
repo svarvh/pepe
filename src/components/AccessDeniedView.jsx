@@ -1,7 +1,15 @@
 import React from "react";
 import { ShieldAlert, ArrowLeft, LogIn, Lock } from "lucide-react";
 
-export default function AccessDeniedView({ currentUser, onReturnToDashboard, onSwitchToAdmin }) {
+export default function AccessDeniedView({
+  currentUser,
+  attemptedRoute = "admin", // 'admin' | 'faculty'
+  onReturnToDashboard,
+  onSwitchToAdmin,
+  onSwitchToFaculty
+}) {
+  const isFacultyAttempt = attemptedRoute === "faculty";
+
   return (
     <div className="access-denied-container fade-in">
       <div className="access-denied-card">
@@ -9,20 +17,32 @@ export default function AccessDeniedView({ currentUser, onReturnToDashboard, onS
           <ShieldAlert size={48} className="text-amber" />
         </div>
 
-        <span className="error-code-badge">HTTP 403 • FORBIDDEN</span>
+        <span className="error-code-badge">HTTP 403 • ACCESS FORBIDDEN</span>
 
-        <h1 className="access-denied-title">Administrator Privileges Required</h1>
+        <h1 className="access-denied-title">
+          {isFacultyAttempt ? "Faculty Authorization Required" : "Administrator Privileges Required"}
+        </h1>
 
         <p className="access-denied-message">
           You are currently signed in as{" "}
           <strong>{currentUser?.name || "a registered user"}</strong> (
           <code>{currentUser?.email || "student@caplen.edu"}</code>) with the{" "}
-          <span className="role-chip student">student</span> role.
+          <span className="role-chip student">{currentUser?.role || "student"}</span> role.
         </p>
 
         <p className="access-denied-detail">
-          The <code>/admin</code> control panel, question approval workflows, syllabus management,
-          and platform readiness checklists are strictly restricted to authorized faculty and academic administrators.
+          {isFacultyAttempt ? (
+            <>
+              The <code>/faculty</code> educator workspace, PDF document uploads, AI question generation,
+              question paper builder, and class curriculum management are restricted to verified faculty members.
+              Students cannot access or publish faculty resources.
+            </>
+          ) : (
+            <>
+              The <code>/admin</code> control panel, user management, and platform readiness checklists
+              are strictly restricted to authorized platform administrators.
+            </>
+          )}
         </p>
 
         <div className="access-denied-actions">
@@ -33,17 +53,26 @@ export default function AccessDeniedView({ currentUser, onReturnToDashboard, onS
             <ArrowLeft size={16} /> Return to Student Dashboard
           </button>
 
-          <button
-            onClick={onSwitchToAdmin}
-            className="btn-outline-neutral"
-          >
-            <LogIn size={16} /> Sign In with Admin Account
-          </button>
+          {isFacultyAttempt ? (
+            <button
+              onClick={onSwitchToFaculty || onSwitchToAdmin}
+              className="btn-outline-neutral"
+            >
+              <LogIn size={16} /> Sign In as Faculty Instructor
+            </button>
+          ) : (
+            <button
+              onClick={onSwitchToAdmin}
+              className="btn-outline-neutral"
+            >
+              <LogIn size={16} /> Sign In with Admin Account
+            </button>
+          )}
         </div>
 
         <div className="security-notice-footer">
           <Lock size={13} />
-          <span>Caplen RBAC: Role-based permissions are strictly verified on all administrative operations.</span>
+          <span>Caplen RBAC: Role-based permissions are strictly enforced. Students cannot escalate their own privileges.</span>
         </div>
       </div>
     </div>

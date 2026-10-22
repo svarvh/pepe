@@ -22,6 +22,13 @@ import {
   EXAM_RULES_CONFIG,
   LAUNCH_CHECKLIST_ITEMS
 } from "../data/edtechCurriculum";
+import {
+  SEED_FACULTY_CLASSES,
+  SEED_FACULTY_RESOURCES,
+  SEED_FACULTY_QUESTIONS,
+  SEED_FACULTY_PAPERS,
+  SEED_FACULTY_TOPICS
+} from "../data/facultySeedData";
 import { AuthService } from "./authService";
 
 const KEYS = {
@@ -41,7 +48,12 @@ const KEYS = {
   IMPORTED_SETS: "caplen_imported_question_sets",
   SETTINGS: "caplen_user_settings",
   EVENTS: "caplen_calendar_events",
-  CUSTOM_TEST_RESULTS: "edtech_custom_test_results"
+  CUSTOM_TEST_RESULTS: "edtech_custom_test_results",
+  FACULTY_RESOURCES: "caplen_faculty_resources",
+  FACULTY_PAPERS: "caplen_faculty_papers",
+  FACULTY_TOPICS: "caplen_faculty_topics",
+  FACULTY_QUESTIONS: "caplen_faculty_questions",
+  FACULTY_CLASSES: "caplen_faculty_classes"
 };
 
 // Safe JSON get/set
@@ -212,6 +224,21 @@ export const StorageService = {
     }
     if (!localStorage.getItem(KEYS.EVENTS)) {
       setStorage(KEYS.EVENTS, UPCOMING_EVENTS);
+    }
+    if (!localStorage.getItem(KEYS.FACULTY_RESOURCES)) {
+      setStorage(KEYS.FACULTY_RESOURCES, SEED_FACULTY_RESOURCES);
+    }
+    if (!localStorage.getItem(KEYS.FACULTY_PAPERS)) {
+      setStorage(KEYS.FACULTY_PAPERS, SEED_FACULTY_PAPERS);
+    }
+    if (!localStorage.getItem(KEYS.FACULTY_TOPICS)) {
+      setStorage(KEYS.FACULTY_TOPICS, SEED_FACULTY_TOPICS);
+    }
+    if (!localStorage.getItem(KEYS.FACULTY_QUESTIONS)) {
+      setStorage(KEYS.FACULTY_QUESTIONS, SEED_FACULTY_QUESTIONS);
+    }
+    if (!localStorage.getItem(KEYS.FACULTY_CLASSES)) {
+      setStorage(KEYS.FACULTY_CLASSES, SEED_FACULTY_CLASSES);
     }
   },
 
@@ -539,6 +566,245 @@ export const StorageService = {
     const updated = [...events, event];
     setStorage(KEYS.EVENTS, updated);
     return updated;
+  },
+
+  // =========================================================================
+  // FACULTY PANEL & EDUCATIONAL MATERIAL MANAGEMENT
+  // =========================================================================
+
+  // Faculty Resources & Uploaded PDFs
+  getFacultyResources() {
+    return getStorage(KEYS.FACULTY_RESOURCES, SEED_FACULTY_RESOURCES);
+  },
+  saveFacultyResource(resource) {
+    const list = this.getFacultyResources();
+    const existingIndex = list.findIndex(r => r.id === resource.id);
+    let updated;
+    const now = new Date().toISOString();
+    if (existingIndex >= 0) {
+      const prev = list[existingIndex];
+      const version = (prev.version || 1) + 1;
+      updated = [...list];
+      updated[existingIndex] = { ...prev, ...resource, updatedAt: now, version };
+    } else {
+      const newEntry = {
+        id: resource.id || `fac-res-${Date.now()}`,
+        version: 1,
+        createdAt: now,
+        updatedAt: now,
+        ...resource
+      };
+      updated = [newEntry, ...list];
+    }
+    setStorage(KEYS.FACULTY_RESOURCES, updated);
+    return updated;
+  },
+  deleteFacultyResource(resourceId) {
+    const list = this.getFacultyResources();
+    const updated = list.filter(r => r.id !== resourceId);
+    setStorage(KEYS.FACULTY_RESOURCES, updated);
+    return updated;
+  },
+  // Student-Facing: ONLY returns published resources (drafts remain strictly private)
+  getPublishedFacultyResources(filter = {}) {
+    const list = this.getFacultyResources();
+    return list.filter(r => {
+      if (r.status !== "published") return false;
+      if (filter.subjectId && r.subjectId !== filter.subjectId && !r.subject?.toLowerCase().includes(filter.subjectId.toLowerCase())) {
+        return false;
+      }
+      if (filter.chapter && !r.chapter?.toLowerCase().includes(filter.chapter.toLowerCase())) {
+        return false;
+      }
+      if (filter.classGrade && !r.classGrade?.toLowerCase().includes(filter.classGrade.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  },
+
+  // Faculty Question Papers
+  getFacultyPapers() {
+    return getStorage(KEYS.FACULTY_PAPERS, SEED_FACULTY_PAPERS);
+  },
+  saveFacultyPaper(paper) {
+    const list = this.getFacultyPapers();
+    const existingIndex = list.findIndex(p => p.id === paper.id);
+    let updated;
+    const now = new Date().toISOString();
+    if (existingIndex >= 0) {
+      updated = [...list];
+      updated[existingIndex] = { ...list[existingIndex], ...paper, updatedAt: now };
+    } else {
+      const newEntry = {
+        id: paper.id || `fac-paper-${Date.now()}`,
+        createdAt: now,
+        updatedAt: now,
+        ...paper
+      };
+      updated = [newEntry, ...list];
+    }
+    setStorage(KEYS.FACULTY_PAPERS, updated);
+    return updated;
+  },
+  deleteFacultyPaper(paperId) {
+    const list = this.getFacultyPapers();
+    const updated = list.filter(p => p.id !== paperId);
+    setStorage(KEYS.FACULTY_PAPERS, updated);
+    return updated;
+  },
+  // Student-Facing: ONLY returns published faculty papers
+  getPublishedFacultyPapers(filter = {}) {
+    const list = this.getFacultyPapers();
+    return list.filter(p => {
+      if (p.status !== "published") return false;
+      if (filter.subjectId && p.subjectId !== filter.subjectId && !p.subject?.toLowerCase().includes(filter.subjectId.toLowerCase())) {
+        return false;
+      }
+      if (filter.classGrade && !p.classGrade?.toLowerCase().includes(filter.classGrade.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  },
+
+  // Faculty Important Topics
+  getFacultyTopics() {
+    return getStorage(KEYS.FACULTY_TOPICS, SEED_FACULTY_TOPICS);
+  },
+  saveFacultyTopic(topic) {
+    const list = this.getFacultyTopics();
+    const existingIndex = list.findIndex(t => t.id === topic.id);
+    let updated;
+    const now = new Date().toISOString();
+    if (existingIndex >= 0) {
+      updated = [...list];
+      updated[existingIndex] = { ...list[existingIndex], ...topic, updatedAt: now };
+    } else {
+      const newEntry = {
+        id: topic.id || `fac-top-${Date.now()}`,
+        createdAt: now,
+        ...topic
+      };
+      updated = [newEntry, ...list];
+    }
+    setStorage(KEYS.FACULTY_TOPICS, updated);
+    return updated;
+  },
+  deleteFacultyTopic(topicId) {
+    const list = this.getFacultyTopics();
+    const updated = list.filter(t => t.id !== topicId);
+    setStorage(KEYS.FACULTY_TOPICS, updated);
+    return updated;
+  },
+  // Student-Facing: ONLY returns published topics
+  getPublishedFacultyTopics(filter = {}) {
+    const list = this.getFacultyTopics();
+    return list.filter(t => {
+      if (t.status !== "published") return false;
+      if (filter.subjectId && t.subjectId !== filter.subjectId && !t.subject?.toLowerCase().includes(filter.subjectId.toLowerCase())) {
+        return false;
+      }
+      if (filter.classGrade && !t.classGrade?.toLowerCase().includes(filter.classGrade.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  },
+
+  // Faculty Question Bank
+  getFacultyQuestions() {
+    return getStorage(KEYS.FACULTY_QUESTIONS, SEED_FACULTY_QUESTIONS);
+  },
+  saveFacultyQuestion(question) {
+    const list = this.getFacultyQuestions();
+    const existingIndex = list.findIndex(q => q.id === question.id);
+    let updated;
+    if (existingIndex >= 0) {
+      updated = [...list];
+      updated[existingIndex] = { ...list[existingIndex], ...question };
+    } else {
+      const newEntry = {
+        id: question.id || `fac-q-${Date.now()}`,
+        approvalStatus: question.approvalStatus || "approved",
+        source: question.source || "Faculty Created",
+        ...question
+      };
+      updated = [newEntry, ...list];
+    }
+    setStorage(KEYS.FACULTY_QUESTIONS, updated);
+    return updated;
+  },
+  deleteFacultyQuestion(questionId) {
+    const list = this.getFacultyQuestions();
+    const updated = list.filter(q => q.id !== questionId);
+    setStorage(KEYS.FACULTY_QUESTIONS, updated);
+    return updated;
+  },
+
+  // Faculty Assigned Classes
+  getFacultyClasses() {
+    return getStorage(KEYS.FACULTY_CLASSES, SEED_FACULTY_CLASSES);
+  },
+  saveFacultyClass(cls) {
+    const list = this.getFacultyClasses();
+    const existingIndex = list.findIndex(c => c.id === cls.id);
+    let updated;
+    if (existingIndex >= 0) {
+      updated = [...list];
+      updated[existingIndex] = { ...list[existingIndex], ...cls };
+    } else {
+      const newEntry = { id: cls.id || `cls-${Date.now()}`, ...cls };
+      updated = [...list, newEntry];
+    }
+    setStorage(KEYS.FACULTY_CLASSES, updated);
+    return updated;
+  },
+
+  // Dynamic Faculty Overview Metrics
+  getFacultyStats() {
+    const resources = this.getFacultyResources();
+    const papers = this.getFacultyPapers();
+    const topics = this.getFacultyTopics();
+    const questions = this.getFacultyQuestions();
+    const classes = this.getFacultyClasses();
+
+    const publishedResources = resources.filter(r => r.status === "published").length;
+    const draftResources = resources.filter(r => r.status === "draft").length;
+
+    const publishedPapers = papers.filter(p => p.status === "published").length;
+    const draftPapers = papers.filter(p => p.status === "draft").length;
+
+    const publishedTopics = topics.filter(t => t.status === "published").length;
+    const draftTopics = topics.filter(t => t.status === "draft").length;
+
+    const facultyCreatedCount = questions.filter(q => q.source === "Faculty Created").length;
+    const aiFacultyCount = questions.filter(q => q.source === "AI Generated From Faculty Material").length;
+    const aiGeneralCount = questions.filter(q => q.source === "AI Generated").length;
+    const importedPdfCount = questions.filter(q => q.source === "Imported From PDF").length;
+
+    const totalStudents = classes.reduce((acc, c) => acc + (c.studentCount || 0), 0);
+
+    return {
+      totalResources: resources.length,
+      publishedResources,
+      draftResources,
+      totalPapers: papers.length,
+      publishedPapers,
+      draftPapers,
+      totalTopics: topics.length,
+      publishedTopics,
+      draftTopics,
+      totalQuestions: questions.length,
+      questionSources: {
+        facultyCreated: facultyCreatedCount,
+        aiFromFaculty: aiFacultyCount,
+        aiGeneral: aiGeneralCount,
+        importedPdf: importedPdfCount
+      },
+      totalClasses: classes.length,
+      totalStudents
+    };
   },
 
   // Reset to factory demo data

@@ -71,7 +71,7 @@ export default function AuthModal({
         }
 
         onAuthSuccess(res.user, "student");
-      } else if (mode === "login" || mode === "admin-login") {
+      } else if (mode === "login" || mode === "admin-login" || mode === "faculty-login") {
         const res = AuthService.login(email, password);
         if (!res.success) {
           setErrorMessage(res.error);
@@ -81,7 +81,14 @@ export default function AuthModal({
 
         // Check if admin mode was attempted by a non-admin
         if (mode === "admin-login" && res.user.role !== ROLES.ADMIN) {
-          setErrorMessage("This account does not have administrator privileges. Please sign in as a student.");
+          setErrorMessage("This account does not have administrator privileges. Please sign in as a student or faculty.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Check if faculty mode was attempted by a non-faculty/non-admin
+        if (mode === "faculty-login" && res.user.role !== ROLES.FACULTY && res.user.role !== ROLES.ADMIN) {
+          setErrorMessage("This account does not have faculty privileges. Please sign in as a student.");
           setIsSubmitting(false);
           return;
         }
@@ -109,6 +116,16 @@ export default function AuthModal({
     const res = AuthService.login("student@caplen.edu", "student123");
     if (res.success) {
       onAuthSuccess(res.user, "student");
+    }
+  };
+
+  const handleQuickDemoFaculty = () => {
+    setEmail("faculty@caplen.edu");
+    setPassword("faculty123");
+    setErrorMessage("");
+    const res = AuthService.login("faculty@caplen.edu", "faculty123");
+    if (res.success) {
+      onAuthSuccess(res.user, "faculty");
     }
   };
 
@@ -151,7 +168,7 @@ export default function AuthModal({
 
         {/* Mode Selector Tabs */}
         {mode !== "forgot" && (
-          <div className="auth-tabs-row">
+          <div className="auth-tabs-row four-tabs">
             <button
               type="button"
               className={`auth-tab-btn ${mode === "login" ? "active" : ""}`}
@@ -168,10 +185,17 @@ export default function AuthModal({
             </button>
             <button
               type="button"
+              className={`auth-tab-btn faculty-tab ${mode === "faculty-login" ? "active" : ""}`}
+              onClick={() => { setMode("faculty-login"); setErrorMessage(""); }}
+            >
+              <BookOpen size={14} /> Faculty Portal
+            </button>
+            <button
+              type="button"
               className={`auth-tab-btn admin-tab ${mode === "admin-login" ? "active" : ""}`}
               onClick={() => { setMode("admin-login"); setErrorMessage(""); }}
             >
-              <ShieldCheck size={14} /> Admin Portal
+              <ShieldCheck size={14} /> Admin
             </button>
           </div>
         )}
@@ -181,13 +205,15 @@ export default function AuthModal({
           <h2 className="auth-heading">
             {mode === "register" && "Start Learning Free"}
             {mode === "login" && "Welcome Back, Student"}
+            {mode === "faculty-login" && "Faculty & Instructor Portal"}
             {mode === "admin-login" && "Administrator Sign In"}
             {mode === "forgot" && "Reset Password"}
           </h2>
           <p className="auth-subheading">
             {mode === "register" && "Create your free account to access questions, notes, and track your scores."}
             {mode === "login" && "Enter your email and password to resume your practice sessions."}
-            {mode === "admin-login" && "Faculty and administration access for syllabus, questions, and approval workflows."}
+            {mode === "faculty-login" && "Upload study materials, build question papers, generate AI questions from PDFs, and manage classes."}
+            {mode === "admin-login" && "Platform governance, syllabus management, and user permissions."}
             {mode === "forgot" && "Enter your email address and we'll send a link to reset your password."}
           </p>
         </div>
@@ -324,6 +350,7 @@ export default function AuthModal({
                 <span>
                   {mode === "register" && "Create Free Student Account"}
                   {mode === "login" && "Sign In as Student"}
+                  {mode === "faculty-login" && "Sign In to Faculty Portal"}
                   {mode === "admin-login" && "Access Admin Portal"}
                   {mode === "forgot" && "Send Reset Link"}
                 </span>
@@ -339,7 +366,7 @@ export default function AuthModal({
             <Sparkles size={13} className="text-emerald" />
             <span>Instant Demo Sign-In (Click to Test Roles):</span>
           </div>
-          <div className="demo-shortcuts-grid">
+          <div className="demo-shortcuts-grid three-presets">
             <button
               type="button"
               onClick={handleQuickDemoStudent}
@@ -347,6 +374,14 @@ export default function AuthModal({
             >
               <div className="preset-name">Student Account</div>
               <div className="preset-meta">student@caplen.edu (Alyssa Vance)</div>
+            </button>
+            <button
+              type="button"
+              onClick={handleQuickDemoFaculty}
+              className="btn-demo-preset faculty"
+            >
+              <div className="preset-name">Faculty Account</div>
+              <div className="preset-meta">faculty@caplen.edu (Prof. Sunita Rao)</div>
             </button>
             <button
               type="button"

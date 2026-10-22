@@ -24,13 +24,15 @@ import PublicLandingPage from "./components/PublicLandingPage";
 import AuthModal from "./components/AuthModal";
 import AdminPanel from "./components/AdminPanel";
 import AccessDeniedView from "./components/AccessDeniedView";
+import FacultyPanel from "./components/FacultyPanel";
 import { StorageService } from "./services/storage";
 import { AuthService, ROLES } from "./services/authService";
 import "./App.css";
 
 export default function App() {
-  // Top-level architectural view: 'public' | 'student' | 'admin' | 'access-denied'
+  // Top-level architectural view: 'public' | 'student' | 'faculty' | 'admin' | 'access-denied'
   const [topLevelView, setTopLevelView] = useState("public");
+  const [attemptedDeniedRoute, setAttemptedDeniedRoute] = useState("admin"); // 'admin' | 'faculty'
 
   // Auth state
   const [currentUser, setCurrentUser] = useState(null);
@@ -66,9 +68,25 @@ export default function App() {
         setAuthRedirectMessage("Administrator sign-in required to access the admin portal.");
         setIsAuthModalOpen(true);
       } else if (activeUsr.role !== ROLES.ADMIN) {
+        setAttemptedDeniedRoute("admin");
         setTopLevelView("access-denied");
       } else {
         setTopLevelView("admin");
+      }
+      return;
+    }
+
+    if (path.startsWith("/faculty") || hash === "#faculty") {
+      if (!activeUsr) {
+        setTopLevelView("public");
+        setAuthModalMode("faculty-login");
+        setAuthRedirectMessage("Faculty sign-in required to access the faculty panel.");
+        setIsAuthModalOpen(true);
+      } else if (activeUsr.role !== ROLES.FACULTY && activeUsr.role !== ROLES.ADMIN) {
+        setAttemptedDeniedRoute("faculty");
+        setTopLevelView("access-denied");
+      } else {
+        setTopLevelView("faculty");
       }
       return;
     }
@@ -95,16 +113,20 @@ export default function App() {
         setIsAuthModalOpen(true);
       } else if (activeUsr.role === ROLES.ADMIN) {
         setTopLevelView("admin");
+      } else if (activeUsr.role === ROLES.FACULTY) {
+        setTopLevelView("faculty");
       } else {
         setTopLevelView("student");
       }
       return;
     }
 
-    // Default root path: show public landing page for new visitors or student dashboard for logged-in students
+    // Default root path: show public landing page for new visitors or student/faculty/admin dashboard for logged-in users
     if (activeUsr) {
       if (activeUsr.role === ROLES.ADMIN) {
         setTopLevelView("admin");
+      } else if (activeUsr.role === ROLES.FACULTY) {
+        setTopLevelView("faculty");
       } else {
         setTopLevelView("student");
       }
@@ -151,6 +173,9 @@ export default function App() {
     if (role === ROLES.ADMIN) {
       setTopLevelView("admin");
       window.history.pushState({}, "", "/admin");
+    } else if (role === ROLES.FACULTY) {
+      setTopLevelView("faculty");
+      window.history.pushState({}, "", "/faculty");
     } else {
       setTopLevelView("student");
       setCurrentRoute("dashboard");
@@ -177,12 +202,29 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleGoToFaculty = () => {
+    const check = AuthService.verifyFacultyAccess();
+    if (!check.authorized) {
+      if (!currentUser) {
+        handleOpenAuth("faculty-login", "Faculty credentials required to enter /faculty.");
+      } else {
+        setAttemptedDeniedRoute("faculty");
+        setTopLevelView("access-denied");
+      }
+      return;
+    }
+    setTopLevelView("faculty");
+    window.history.pushState({}, "", "/faculty");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleGoToAdmin = () => {
     const check = AuthService.verifyAdminAccess();
     if (!check.authorized) {
       if (!currentUser) {
         handleOpenAuth("admin-login", "Administrator credentials required to enter /admin.");
       } else {
+        setAttemptedDeniedRoute("admin");
         setTopLevelView("access-denied");
       }
       return;
@@ -287,14 +329,16 @@ export default function App() {
             }
           }}
           onGoToDashboard={handleGoToDashboard}
+          onGoToFaculty={handleGoToFaculty}
           onGoToAdmin={handleGoToAdmin}
         />
       )}
 
-      {/* 2. ACCESS DENIED SCREEN (When Student attempts /admin) */}
+      {/* 2. ACCESS DENIED SCREEN (When Unauthorized user attempts /admin or /faculty) */}
       {topLevelView === "access-denied" && (
         <AccessDeniedView
           currentUser={currentUser}
+          attemptedRoute={attemptedDeniedRoute}
           onReturnToDashboard={() => {
             setTopLevelView("student");
             window.history.pushState({}, "", "/dashboard");
@@ -302,10 +346,25 @@ export default function App() {
           onSwitchToAdmin={() => {
             handleOpenAuth("admin-login", "Sign in with administrator credentials to access /admin.");
           }}
+          onSwitchToFaculty={() => {
+            handleOpenAuth("faculty-login", "Sign in with faculty instructor credentials to access /faculty.");
+          }}
         />
       )}
 
-      {/* 3. DEDICATED ADMIN PANEL (Distinct Layout for Authorized Admins) */}
+      {/* 3. DEDICATED FACULTY PANEL (Professional Workspace for Teachers) */}
+      {topLevelView === "faculty" && (
+        <FacultyPanel
+          currentUser={currentUser}
+          onNavigateToStudent={() => {
+            setTopLevelView("student");
+            window.history.pushState({}, "", "/dashboard");
+          }}
+          onFacultyLogout={handleLogout}
+        />
+      )}
+
+      {/* 4. DEDICATED ADMIN PANEL (Distinct Layout for Authorized Admins) */}
       {topLevelView === "admin" && (
         <AdminPanel
           currentUser={currentUser}
@@ -317,7 +376,7 @@ export default function App() {
         />
       )}
 
-      {/* 4. STUDENT APPLICATION (Authenticated Student Dashboard & Learning Views) */}
+      {/* 5. STUDENT APPLICATION (Authenticated Student Dashboard & Learning Views) */}
       {topLevelView === "student" && (
         <div className="app-container">
           {/* Student Sidebar (NO Admin CMS, NO Launch Checklist) */}

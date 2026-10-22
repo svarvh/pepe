@@ -5,6 +5,7 @@
 
 export const ROLES = {
   STUDENT: "student",
+  FACULTY: "faculty",
   ADMIN: "admin"
 };
 
@@ -24,6 +25,20 @@ const SEED_USERS = [
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
     targetExam: "CBSE Class 12 & NEET 2026",
     registeredAt: "2026-09-01T08:00:00Z",
+    status: "active"
+  },
+  {
+    id: "usr_faculty_01",
+    name: "Prof. Sunita Rao",
+    email: "faculty@caplen.edu",
+    passwordHash: "faculty123", // For mock demo verification
+    role: ROLES.FACULTY,
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=256&h=256",
+    title: "Senior HOD Sciences",
+    department: "Department of Biological & Chemical Sciences",
+    subjects: ["Biology", "Chemistry"],
+    classes: ["Class 10", "Class 11", "Class 12"],
+    registeredAt: "2026-08-20T10:00:00Z",
     status: "active"
   },
   {
@@ -128,6 +143,32 @@ export const AuthService = {
       return {
         authorized: false,
         reason: "Access Denied: Administrator role required.",
+        code: "FORBIDDEN",
+        userRole: session.user.role
+      };
+    }
+
+    return {
+      authorized: true,
+      user: session.user
+    };
+  },
+
+  // Strict server-side style verification of faculty privileges (faculty or admin allowed)
+  verifyFacultyAccess() {
+    const session = this.getCurrentSession();
+    if (!session || !session.user) {
+      return {
+        authorized: false,
+        reason: "Unauthenticated. Please log in with faculty or administrator credentials.",
+        code: "UNAUTHENTICATED"
+      };
+    }
+
+    if (session.user.role !== ROLES.FACULTY && session.user.role !== ROLES.ADMIN) {
+      return {
+        authorized: false,
+        reason: "Access Denied: Faculty authorization required. If you are an educator, please request access from the platform administrator.",
         code: "FORBIDDEN",
         userRole: session.user.role
       };
