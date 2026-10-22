@@ -22,6 +22,7 @@ import {
   EXAM_RULES_CONFIG,
   LAUNCH_CHECKLIST_ITEMS
 } from "../data/edtechCurriculum";
+import { AuthService } from "./authService";
 
 const KEYS = {
   USER: "caplen_user_profile",
@@ -339,6 +340,11 @@ export const StorageService = {
 
   // User Profile
   getUser() {
+    const authSession = AuthService.getCurrentSession();
+    if (authSession && authSession.user) {
+      const stored = getStorage(KEYS.USER, INITIAL_USER);
+      return { ...stored, ...authSession.user };
+    }
     return getStorage(KEYS.USER, INITIAL_USER);
   },
   saveUser(user) {
@@ -352,6 +358,18 @@ export const StorageService = {
   addQuestion(question) {
     const questions = this.getQuestions();
     const updated = [question, ...questions];
+    setStorage(KEYS.QUESTIONS, updated);
+    return updated;
+  },
+  updateQuestion(questionId, updatedData) {
+    const questions = this.getQuestions();
+    const updated = questions.map(q => q.id === questionId ? { ...q, ...updatedData } : q);
+    setStorage(KEYS.QUESTIONS, updated);
+    return updated;
+  },
+  deleteQuestion(questionId) {
+    const questions = this.getQuestions();
+    const updated = questions.filter(q => q.id !== questionId);
     setStorage(KEYS.QUESTIONS, updated);
     return updated;
   },

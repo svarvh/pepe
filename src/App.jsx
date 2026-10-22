@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import BottomNav from "./components/BottomNav";
@@ -11,8 +11,6 @@ import ExamScreen from "./components/ExamScreen";
 import InstantResultView from "./components/InstantResultView";
 import AIDoubtSolverView from "./components/AIDoubtSolverView";
 import RevisionNotebookView from "./components/RevisionNotebookView";
-import AdminCMSView from "./components/AdminCMSView";
-import LaunchChecklistView from "./components/LaunchChecklistView";
 import TerminologyDrawer from "./components/TerminologyDrawer";
 import AIGeneratorView from "./components/AIGeneratorView";
 import PYPPapersView from "./components/PYPPapersView";
@@ -22,10 +20,25 @@ import SelfGeneratorView from "./components/SelfGeneratorView";
 import LibraryView from "./components/LibraryView";
 import AnalyticsView from "./components/AnalyticsView";
 import SettingsView from "./components/SettingsView";
+import PublicLandingPage from "./components/PublicLandingPage";
+import AuthModal from "./components/AuthModal";
+import AdminPanel from "./components/AdminPanel";
+import AccessDeniedView from "./components/AccessDeniedView";
 import { StorageService } from "./services/storage";
+import { AuthService, ROLES } from "./services/authService";
 import "./App.css";
 
 export default function App() {
+  // Top-level architectural view: 'public' | 'student' | 'admin' | 'access-denied'
+  const [topLevelView, setTopLevelView] = useState("public");
+
+  // Auth state
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState("login");
+  const [authRedirectMessage, setAuthRedirectMessage] = useState("");
+
+  // Student application route
   const [currentRoute, setCurrentRoute] = useState("dashboard");
   const [user, setUser] = useState(StorageService.getUser());
   const [statistics, setStatistics] = useState(StorageService.getStatistics());
@@ -38,20 +51,168 @@ export default function App() {
   const [globalTermId, setGlobalTermId] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Initialize persistent storage
-  useEffect(() => {
-    StorageService.init();
-    refreshMetrics();
+  // Sync routing from URL
+  const syncRouteFromLocation = useCallback(() => {
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    const session = AuthService.getCurrentSession();
+    const activeUsr = session ? session.user : null;
+    setCurrentUser(activeUsr);
+
+    if (path.startsWith("/admin") || hash === "#admin") {
+      if (!activeUsr) {
+        setTopLevelView("public");
+        setAuthModalMode("admin-login");
+        setAuthRedirectMessage("Administrator sign-in required to access the admin portal.");
+        setIsAuthModalOpen(true);
+      } else if (activeUsr.role !== ROLES.ADMIN) {
+        setTopLevelView("access-denied");
+      } else {
+        setTopLevelView("admin");
+      }
+      return;
+    }
+
+    if (path.startsWith("/login") || hash === "#login") {
+      setTopLevelView("public");
+      setAuthModalMode("login");
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (path.startsWith("/register") || hash === "#register") {
+      setTopLevelView("public");
+      setAuthModalMode("register");
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (path.startsWith("/app") || path.startsWith("/dashboard") || hash === "#app" || hash === "#dashboard") {
+      if (!activeUsr) {
+        setTopLevelView("public");
+        setAuthModalMode("login");
+        setAuthRedirectMessage("Please sign in or create an account to access the learning dashboard.");
+        setIsAuthModalOpen(true);
+      } else if (activeUsr.role === ROLES.ADMIN) {
+        setTopLevelView("admin");
+      } else {
+        setTopLevelView("student");
+      }
+      return;
+    }
+
+    // Default root path: show public landing page for new visitors or student dashboard for logged-in students
+    if (activeUsr) {
+      if (activeUsr.role === ROLES.ADMIN) {
+        setTopLevelView("admin");
+      } else {
+        setTopLevelView("student");
+      }
+    } else {
+      setTopLevelView("public");
+    }
   }, []);
 
+  // Initialize storage, auth, and routing
+  useEffect(() => {
+    StorageService.init();
+    AuthService.init();
+    refreshMetrics();
+    syncRouteFromLocation();
+
+    const handlePopState = () => {
+      syncRouteFromLocation();
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [syncRouteFromLocation]);
+
   const refreshMetrics = () => {
-    setUser(StorageService.getUser());
+    const usr = StorageService.getUser();
+    setUser(usr);
+    setCurrentUser(AuthService.getCurrentUser());
     setStatistics(StorageService.getStatistics());
     setActiveCourse(StorageService.getActiveCourse());
     setLatestExamResult(StorageService.getLatestTestResult());
   };
 
+  // Auth Actions
+  const handleOpenAuth = (mode = "login", redirectMsg = "") => {
+    setAuthModalMode(mode);
+    setAuthRedirectMessage(redirectMsg);
+    setIsAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = (authenticatedUser, role) => {
+    setIsAuthModalOpen(false);
+    setCurrentUser(authenticatedUser);
+    refreshMetrics();
+
+    if (role === ROLES.ADMIN) {
+      setTopLevelView("admin");
+      window.history.pushState({}, "", "/admin");
+    } else {
+      setTopLevelView("student");
+      setCurrentRoute("dashboard");
+      window.history.pushState({}, "", "/dashboard");
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleLogout = () => {
+    AuthService.logout();
+    setCurrentUser(null);
+    setTopLevelView("public");
+    window.history.pushState({}, "", "/");
+    refreshMetrics();
+  };
+
+  const handleGoToDashboard = () => {
+    if (!currentUser) {
+      handleOpenAuth("login");
+      return;
+    }
+    setTopLevelView("student");
+    window.history.pushState({}, "", "/dashboard");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleGoToAdmin = () => {
+    const check = AuthService.verifyAdminAccess();
+    if (!check.authorized) {
+      if (!currentUser) {
+        handleOpenAuth("admin-login", "Administrator credentials required to enter /admin.");
+      } else {
+        setTopLevelView("access-denied");
+      }
+      return;
+    }
+    setTopLevelView("admin");
+    window.history.pushState({}, "", "/admin");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleGoToPublic = () => {
+    setTopLevelView("public");
+    window.history.pushState({}, "", "/");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Student Navigation inside Student Application
   const handleNavigate = (route) => {
+    // If student clicks admin link or attempts admin navigation
+    if (route === "admin") {
+      const check = AuthService.verifyAdminAccess();
+      if (!check.authorized) {
+        setTopLevelView("access-denied");
+        window.history.pushState({}, "", "/admin");
+        return;
+      }
+      setTopLevelView("admin");
+      window.history.pushState({}, "", "/admin");
+      return;
+    }
+
     setCurrentRoute(route);
     setIsMobileMenuOpen(false);
     if (route !== "exam") {
@@ -104,226 +265,258 @@ export default function App() {
     setCurrentRoute("videos");
   };
 
-  const handleSessionCompleted = (newSession) => {
+  const handleSessionCompleted = () => {
     refreshMetrics();
-  };
-
-  const handleLogout = () => {
-    StorageService.resetAll();
-    refreshMetrics();
-    setCurrentRoute("dashboard");
-    setIsMobileMenuOpen(false);
   };
 
   return (
-    <div className="app-container">
-      {/* Sidebar (Permanent on Desktop, Slide-out Drawer on Mobile/Tablet) */}
-      <Sidebar
-        currentRoute={currentRoute}
-        onNavigate={handleNavigate}
-        onLogout={handleLogout}
-        isMobileOpen={isMobileMenuOpen}
-        onCloseMobile={() => setIsMobileMenuOpen(false)}
-      />
-
-      {/* Main Content Area */}
-      <main className="main-content-layout">
-        {/* Header with Global Search, Course Switcher & Mobile Hamburger */}
-        <Header
-          user={user}
-          activeCourse={activeCourse}
-          onCourseChange={handleCourseChange}
-          onNavigate={handleNavigate}
-          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
-          onSelectTerm={(termId) => setGlobalTermId(termId)}
-        />
-
-        {/* Dynamic Route View */}
-        <div className="route-content-viewport">
-          {/* 1. Dashboard View */}
-          {currentRoute === "dashboard" && (
-            <DashboardView
-              user={user}
-              statistics={statistics}
-              onNavigate={handleNavigate}
-              onStartPracticeSubject={handleStartPracticeSubject}
-            />
-          )}
-
-          {/* 2. Module A: Smart Notes & Clickable Terminology */}
-          {currentRoute === "smart-notes" && (
-            <SmartNotesView
-              onNavigate={handleNavigate}
-              onStartPracticeWithTopic={handleStartPracticeWithSet}
-              onOpenVideoForTopic={handleOpenVideo}
-            />
-          )}
-
-          {/* 3. Module C: Topic-Specific Videos & Synchronized Transcripts */}
-          {currentRoute === "videos" && (
-            <TopicVideosView
-              initialTopicId={selectedTopicVideo}
-              onNavigate={handleNavigate}
-              onPracticeTopic={handleStartPracticeSubject}
-            />
-          )}
-
-          {/* 4. Module B: Practice Questions */}
-          {currentRoute === "practice" && (
-            <PracticeView
-              initialSubject={practiceSubject}
-              initialQuestions={practiceQuestions}
-              onSessionCompleted={handleSessionCompleted}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {/* 5. Module D: Custom Test Builder */}
-          {currentRoute === "test-builder" && (
-            <CustomTestBuilderView
-              onLaunchTest={handleLaunchTest}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {/* 6. Active Live Examination Screen */}
-          {currentRoute === "exam" && activeExamConfig && (
-            <ExamScreen
-              testConfig={activeExamConfig}
-              onFinishExam={handleFinishExam}
-              onCancelExam={() => setCurrentRoute("test-builder")}
-            />
-          )}
-
-          {/* 7. Section 4: Instant Result Production & Performance Analytics */}
-          {currentRoute === "results" && (
-            <InstantResultView
-              resultData={latestExamResult}
-              onNavigate={handleNavigate}
-              onRetryMistakes={handleStartPracticeWithSet}
-            />
-          )}
-
-          {/* 8. Section 5: AI Doubt Assistant */}
-          {currentRoute === "doubt-solver" && (
-            <AIDoubtSolverView
-              onNavigate={handleNavigate}
-              onPracticeTopic={handleStartPracticeSubject}
-            />
-          )}
-
-          {/* 9. Section 5: Digital Notebook & Spaced Repetition */}
-          {currentRoute === "revision" && (
-            <RevisionNotebookView
-              onNavigate={handleNavigate}
-              onStartPracticeWithMistakes={handleStartPracticeWithSet}
-            />
-          )}
-
-          {/* 10. Section 6: Teacher & Admin CMS */}
-          {currentRoute === "admin" && (
-            <AdminCMSView
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {/* 11. Section 15: 20-Point Go-Live Launch Checklist */}
-          {currentRoute === "checklist" && (
-            <LaunchChecklistView
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {/* Legacy & Secondary Modules */}
-          {currentRoute === "pyq" && (
-            <PYPPapersView
-              onStartPracticeWithPaper={(paper) => {
-                setPracticeSubject({ id: paper.subjectId, name: paper.subject });
-                setCurrentRoute("practice");
-              }}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {currentRoute === "ai-generator" && (
-            <AIGeneratorView
-              onStartPracticeSet={handleStartPracticeWithSet}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {currentRoute === "topics" && (
-            <ImportantTopicsView
-              onPracticeTopic={(topic) => {
-                setPracticeSubject({ id: topic.subjectId, name: topic.unit });
-                setCurrentRoute("practice");
-              }}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {currentRoute === "import" && (
-            <ImportQuestionsView
-              onStartPracticeWithImported={handleStartPracticeWithSet}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {currentRoute === "self-generator" && (
-            <SelfGeneratorView
-              onStartPracticeWithCustom={handleStartPracticeWithSet}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {currentRoute === "library" && (
-            <LibraryView
-              onStartPracticeWithCustom={handleStartPracticeWithSet}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {currentRoute === "analytics" && (
-            <AnalyticsView
-              onStartPracticeWeakTopics={handleStartPracticeWithSet}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {currentRoute === "settings" && (
-            <SettingsView
-              user={user}
-              onUserUpdate={(updatedUser) => {
-                setUser(updatedUser);
-                refreshMetrics();
-              }}
-            />
-          )}
-        </div>
-
-        {/* Global Central Terminology Drawer */}
-        {globalTermId && (
-          <TerminologyDrawer
-            termId={globalTermId}
-            onClose={() => setGlobalTermId(null)}
-            onNavigateToNotes={() => {
-              setGlobalTermId(null);
+    <div className="caplen-app-wrapper">
+      {/* 1. PUBLIC LANDING PAGE (First Page Visitors See) */}
+      {topLevelView === "public" && (
+        <PublicLandingPage
+          currentUser={currentUser}
+          onOpenAuth={handleOpenAuth}
+          onNavigateToCourse={(courseId) => {
+            StorageService.setActiveCourse(courseId);
+            setActiveCourse(courseId);
+            if (currentUser) {
+              setTopLevelView("student");
               setCurrentRoute("smart-notes");
-            }}
-            onPracticeTerm={() => {
-              setGlobalTermId(null);
-              setCurrentRoute("practice");
-            }}
-          />
-        )}
-
-        {/* Mobile Bottom Navigation Bar (Visible on < 768px) */}
-        <BottomNav
-          currentRoute={currentRoute}
-          onNavigate={handleNavigate}
-          onOpenMenu={() => setIsMobileMenuOpen(true)}
+            } else {
+              handleOpenAuth("register");
+            }
+          }}
+          onGoToDashboard={handleGoToDashboard}
+          onGoToAdmin={handleGoToAdmin}
         />
-      </main>
+      )}
+
+      {/* 2. ACCESS DENIED SCREEN (When Student attempts /admin) */}
+      {topLevelView === "access-denied" && (
+        <AccessDeniedView
+          currentUser={currentUser}
+          onReturnToDashboard={() => {
+            setTopLevelView("student");
+            window.history.pushState({}, "", "/dashboard");
+          }}
+          onSwitchToAdmin={() => {
+            handleOpenAuth("admin-login", "Sign in with administrator credentials to access /admin.");
+          }}
+        />
+      )}
+
+      {/* 3. DEDICATED ADMIN PANEL (Distinct Layout for Authorized Admins) */}
+      {topLevelView === "admin" && (
+        <AdminPanel
+          currentUser={currentUser}
+          onNavigateToStudent={() => {
+            setTopLevelView("student");
+            window.history.pushState({}, "", "/dashboard");
+          }}
+          onAdminLogout={handleLogout}
+        />
+      )}
+
+      {/* 4. STUDENT APPLICATION (Authenticated Student Dashboard & Learning Views) */}
+      {topLevelView === "student" && (
+        <div className="app-container">
+          {/* Student Sidebar (NO Admin CMS, NO Launch Checklist) */}
+          <Sidebar
+            currentRoute={currentRoute}
+            onNavigate={handleNavigate}
+            onLogout={handleLogout}
+            isMobileOpen={isMobileMenuOpen}
+            onCloseMobile={() => setIsMobileMenuOpen(false)}
+          />
+
+          {/* Student Main Layout */}
+          <main className="main-content-layout">
+            <Header
+              user={user}
+              activeCourse={activeCourse}
+              onCourseChange={handleCourseChange}
+              onNavigate={handleNavigate}
+              onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+              onSelectTerm={(termId) => setGlobalTermId(termId)}
+              onLogout={handleLogout}
+              onGoHome={handleGoToPublic}
+            />
+
+            <div className="route-content-viewport">
+              {currentRoute === "dashboard" && (
+                <DashboardView
+                  user={user}
+                  statistics={statistics}
+                  onNavigate={handleNavigate}
+                  onStartPracticeSubject={handleStartPracticeSubject}
+                />
+              )}
+
+              {currentRoute === "smart-notes" && (
+                <SmartNotesView
+                  onNavigate={handleNavigate}
+                  onStartPracticeWithTopic={handleStartPracticeWithSet}
+                  onOpenVideoForTopic={handleOpenVideo}
+                />
+              )}
+
+              {currentRoute === "videos" && (
+                <TopicVideosView
+                  initialTopicId={selectedTopicVideo}
+                  onNavigate={handleNavigate}
+                  onPracticeTopic={handleStartPracticeSubject}
+                />
+              )}
+
+              {currentRoute === "practice" && (
+                <PracticeView
+                  initialSubject={practiceSubject}
+                  initialQuestions={practiceQuestions}
+                  onSessionCompleted={handleSessionCompleted}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "test-builder" && (
+                <CustomTestBuilderView
+                  onLaunchTest={handleLaunchTest}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "exam" && activeExamConfig && (
+                <ExamScreen
+                  testConfig={activeExamConfig}
+                  onFinishExam={handleFinishExam}
+                  onCancelExam={() => setCurrentRoute("test-builder")}
+                />
+              )}
+
+              {currentRoute === "results" && (
+                <InstantResultView
+                  resultData={latestExamResult}
+                  onNavigate={handleNavigate}
+                  onRetryMistakes={handleStartPracticeWithSet}
+                />
+              )}
+
+              {currentRoute === "doubt-solver" && (
+                <AIDoubtSolverView
+                  onNavigate={handleNavigate}
+                  onPracticeTopic={handleStartPracticeSubject}
+                />
+              )}
+
+              {currentRoute === "revision" && (
+                <RevisionNotebookView
+                  onNavigate={handleNavigate}
+                  onStartPracticeWithMistakes={handleStartPracticeWithSet}
+                />
+              )}
+
+              {currentRoute === "pyq" && (
+                <PYPPapersView
+                  onStartPracticeWithPaper={(paper) => {
+                    setPracticeSubject({ id: paper.subjectId, name: paper.subject });
+                    setCurrentRoute("practice");
+                  }}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "ai-generator" && (
+                <AIGeneratorView
+                  onStartPracticeSet={handleStartPracticeWithSet}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "topics" && (
+                <ImportantTopicsView
+                  onPracticeTopic={(topic) => {
+                    setPracticeSubject({ id: topic.subjectId, name: topic.unit });
+                    setCurrentRoute("practice");
+                  }}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "import" && (
+                <ImportQuestionsView
+                  onStartPracticeWithImported={handleStartPracticeWithSet}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "self-generator" && (
+                <SelfGeneratorView
+                  onStartPracticeWithCustom={handleStartPracticeWithSet}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "library" && (
+                <LibraryView
+                  onStartPracticeWithCustom={handleStartPracticeWithSet}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "analytics" && (
+                <AnalyticsView
+                  onStartPracticeWeakTopics={handleStartPracticeWithSet}
+                  onNavigate={handleNavigate}
+                />
+              )}
+
+              {currentRoute === "settings" && (
+                <SettingsView
+                  user={user}
+                  onUserUpdate={(updatedUser) => {
+                    setUser(updatedUser);
+                    refreshMetrics();
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Global Terminology Drawer */}
+            {globalTermId && (
+              <TerminologyDrawer
+                termId={globalTermId}
+                onClose={() => setGlobalTermId(null)}
+                onNavigateToNotes={() => {
+                  setGlobalTermId(null);
+                  setCurrentRoute("smart-notes");
+                }}
+                onPracticeTerm={() => {
+                  setGlobalTermId(null);
+                  setCurrentRoute("practice");
+                }}
+              />
+            )}
+
+            {/* Mobile Bottom Navigation */}
+            <BottomNav
+              currentRoute={currentRoute}
+              onNavigate={handleNavigate}
+              onOpenMenu={() => setIsMobileMenuOpen(true)}
+            />
+          </main>
+        </div>
+      )}
+
+      {/* Global Authentication Modal (Accessible from Landing Page, Header, or Protected Redirects) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        initialMode={authModalMode}
+        redirectMessage={authRedirectMessage}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setAuthRedirectMessage("");
+        }}
+        onAuthSuccess={handleAuthSuccess}
+      />
     </div>
   );
 }

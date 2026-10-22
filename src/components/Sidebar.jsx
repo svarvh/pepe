@@ -33,8 +33,10 @@ export default function Sidebar({ currentRoute, onNavigate, onLogout, isMobileOp
     { id: "doubt-solver", label: "AI Doubt Assistant", icon: Sparkles, badge: "NCERT" },
     { id: "revision", label: "Revision & Notebook", icon: RotateCcw },
     { id: "pyq", label: "Previous Year Papers", icon: FileText },
-    { id: "admin", label: "Teacher & Admin CMS", icon: ShieldCheck, badge: "Section 6" },
-    { id: "checklist", label: "Launch Checklist", icon: CheckCircle2, badge: "20/20" },
+    { id: "topics", label: "Important Topics", icon: BookmarkCheck },
+    { id: "ai-generator", label: "Question Generator", icon: Sparkles },
+    { id: "self-generator", label: "Custom Questions", icon: PenTool },
+    { id: "analytics", label: "Student Progress", icon: BarChart2 },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 

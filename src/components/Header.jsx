@@ -16,7 +16,16 @@ import {
 } from "lucide-react";
 import { StorageService } from "../services/storage";
 
-export default function Header({ user, onNavigate, onOpenMobileMenu, onSelectTerm, activeCourse, onCourseChange }) {
+export default function Header({
+  user,
+  onNavigate,
+  onOpenMobileMenu,
+  onSelectTerm,
+  activeCourse,
+  onCourseChange,
+  onLogout,
+  onGoHome
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -337,16 +346,22 @@ export default function Header({ user, onNavigate, onOpenMobileMenu, onSelectTer
                 Performance Analytics
               </button>
               <button
+                className="profile-menu-item"
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  if (onGoHome) onGoHome();
+                }}
+              >
+                View Public Landing Page
+              </button>
+              <button
                 className="profile-menu-item text-danger"
                 onClick={() => {
                   setShowProfileMenu(false);
-                  if (confirm("Reset demo data to initial state?")) {
-                    StorageService.resetAll();
-                    window.location.reload();
-                  }
+                  if (onLogout) onLogout();
                 }}
               >
-                Reset Demo Data
+                Log Out
               </button>
             </div>
           )}
