@@ -10,6 +10,7 @@ import {
   Menu
 } from "lucide-react";
 import { StorageService } from "../services/storage";
+import { AuthService } from "../services/authService";
 
 export default function Header({
   user,
@@ -28,7 +29,11 @@ export default function Header({
   const [isMobileSearchExpanded, setIsMobileSearchExpanded] = useState(false);
 
   const courses = StorageService.getCourses();
-  const currentCourse = StorageService.getCourseById(activeCourse || StorageService.getActiveCourse()) || courses[0];
+  const currentLearningPathId = user?.selectedLearningPath || activeCourse || StorageService.getActiveCourse();
+  const currentCourse = StorageService.getCourseById(currentLearningPathId) || courses[0];
+  const displayLabel = user?.selectedLearningPath
+    ? (currentCourse.shortName || currentCourse.name)
+    : (currentCourse?.name || "Select Class / Exam");
   const allQuestions = StorageService.getQuestions();
   const allPapers = StorageService.getPapers();
   const allTerms = StorageService.getAllTerminology();
@@ -67,6 +72,9 @@ export default function Header({
 
   const handleSelectCourse = (courseId) => {
     StorageService.setActiveCourse(courseId);
+    if (user) {
+      AuthService.updateStudentLearningPath(courseId);
+    }
     if (onCourseChange) onCourseChange(courseId);
     setShowCourseMenu(false);
   };
@@ -114,7 +122,7 @@ export default function Header({
           title="Switch current class or competitive exam"
         >
           <GraduationCap size={16} strokeWidth={2.2} color="#17221F" />
-          <span className="course-pill-label">{currentCourse.name}</span>
+          <span className="course-pill-label">{displayLabel}</span>
           <ChevronDown size={14} strokeWidth={2.2} color="#66736D" />
         </button>
 
@@ -123,6 +131,28 @@ export default function Header({
             <div className="course-dropdown-header">
               <span>Select Class or Exam Track</span>
             </div>
+            
+            <button
+              className="course-dropdown-item change-path-cta-btn"
+              onClick={() => {
+                setShowCourseMenu(false);
+                if (onNavigate) onNavigate("select-learning-path");
+              }}
+              style={{
+                backgroundColor: "#F0FAF4",
+                borderBottom: "1px solid #E1EFE7",
+                marginBottom: 4
+              }}
+            >
+              <div className="course-item-title-row">
+                <strong style={{ color: "#07865B" }}>✦ Open Full Selection Page</strong>
+                <span className="badge badge-sm" style={{ background: "#07865B", color: "#FFFFFF" }}>New</span>
+              </div>
+              <span className="course-item-desc" style={{ color: "#075B43" }}>
+                Visual cards for Class 9–12, JEE & NEET
+              </span>
+            </button>
+
             {courses.map((c) => (
               <button
                 key={c.id}

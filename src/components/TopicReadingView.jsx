@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   BookOpen,
   Video,
@@ -59,6 +59,16 @@ export default function TopicReadingView({
   const [selectedSubjectId, setSelectedSubjectId] = useState(null);
   const [selectedChapterId, setSelectedChapterId] = useState(null);
   const [selectedTopicId, setSelectedTopicId] = useState(initialTopicId);
+
+  // Sync category and topic when initial props change
+  useEffect(() => {
+    if (initialCategoryId) {
+      setSelectedCategoryId(initialCategoryId);
+      setSelectedSubjectId(null);
+      setSelectedChapterId(null);
+      setSelectedTopicId(initialTopicId || null);
+    }
+  }, [initialCategoryId, initialTopicId]);
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState("");
@@ -222,8 +232,31 @@ export default function TopicReadingView({
 
       {/* 2. Category Selector Strip (6 Options matching diagram) */}
       <div className="category-selection-strip">
-        <div className="strip-title-row">
+        <div className="strip-title-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginBottom: "8px" }}>
           <span className="strip-label">Choose your learning category:</span>
+          <button
+            type="button"
+            className="btn-switch-path-pill"
+            id="btn-switch-learning-path"
+            onClick={() => onNavigate && onNavigate("select-learning-path")}
+            title="Open visual selection page for all classes and exams"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              backgroundColor: "#E9F9F0",
+              color: "#07865B",
+              border: "1px solid #CDEEDD",
+              borderRadius: "9999px",
+              padding: "3px 10px",
+              fontSize: "0.76rem",
+              fontWeight: 700,
+              cursor: "pointer"
+            }}
+          >
+            <span>Change Learning Path</span>
+            <ChevronRight size={13} />
+          </button>
         </div>
         <div className="category-chips-scroll">
           {STUDENT_CATEGORIES.map((cat) => {

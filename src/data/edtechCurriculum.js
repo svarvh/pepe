@@ -5,6 +5,8 @@
 // transcripts, and 10+ validated multi-format questions per topic.
 // ==========================================================================
 
+import { CLASS_SPECIFIC_NOTES, CLASS_SPECIFIC_VIDEOS, CLASS_SPECIFIC_QUESTIONS } from "./classCurriculumAdditions";
+
 export const COURSES_CATALOG = [
   {
     id: "jee",
@@ -596,6 +598,7 @@ export const SYLLABUS_TREE = {
 // High-yield theory with embedded interactive terminology tags
 // ==========================================================================
 export const SMART_NOTES_COLLECTION = {
+  ...CLASS_SPECIFIC_NOTES,
   "topic-bio-evolution": {
     topicId: "topic-bio-evolution",
     title: "Mechanism of Evolution: Natural Selection",
@@ -861,6 +864,7 @@ The null hypothesis states that no true experimental effect or population differ
 // Dedicated video lessons with chapter markers, transcripts, and terminology
 // ==========================================================================
 export const TOPIC_VIDEOS_COLLECTION = {
+  ...CLASS_SPECIFIC_VIDEOS,
   "topic-bio-evolution": {
     topicId: "topic-bio-evolution",
     title: "Natural Selection, Industrial Melanism & Genetic Drift Masterclass",
@@ -1040,6 +1044,7 @@ export const TOPIC_VIDEOS_COLLECTION = {
 // Match the Columns, Diagram/Case-based, and PYQs with Marking Rules.
 // ==========================================================================
 export const EXPANDED_QUESTIONS_BANK = [
+  ...CLASS_SPECIFIC_QUESTIONS,
   // ========================================================================
   // TOPIC 1: Natural Selection & Evolution (Biology Class 12 NCERT) - 12 Questions
   // ========================================================================

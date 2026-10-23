@@ -80,12 +80,40 @@ export default function DashboardView({
     <div className="minimal-dashboard-container fade-in">
       {/* 1. Main Welcome Section */}
       <section className="dashboard-welcome-section">
-        <span className="learning-space-eyebrow">YOUR LEARNING SPACE</span>
+        <div className="dashboard-eyebrow-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", marginBottom: "4px" }}>
+          <span className="learning-space-eyebrow">
+            YOUR LEARNING SPACE • {currentTrack.shortName?.toUpperCase() || currentTrack.name?.toUpperCase()}
+          </span>
+          <button
+            type="button"
+            className="btn-change-learning-path-pill"
+            id="btn-change-learning-path"
+            onClick={() => onNavigate && onNavigate("select-learning-path")}
+            title="Change your class or exam target"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              backgroundColor: "#E9F9F0",
+              color: "#07865B",
+              border: "1px solid #CDEEDD",
+              borderRadius: "9999px",
+              padding: "4px 12px",
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.2s ease"
+            }}
+          >
+            <span>Change Class / Exam</span>
+            <ChevronRight size={13} strokeWidth={2.4} />
+          </button>
+        </div>
         <h1 className="learning-space-heading">
           What would you like to do <span className="highlight-green-text">today?</span>
         </h1>
         <p className="learning-space-subtitle">
-          Choose a path and learn at your own pace.
+          {currentTrack.tagline || `Personalised learning materials and practice for ${currentTrack.name}.`}
         </p>
       </section>
 

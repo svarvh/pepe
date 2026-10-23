@@ -121,7 +121,7 @@ export default function Sidebar({ currentRoute, onNavigate, onLogout, onGoHome, 
         <nav className="sidebar-nav">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = currentRoute === item.id;
+            const isActive = currentRoute === item.id || (item.id === "dashboard" && currentRoute === "select-learning-path");
             return (
               <button
                 key={item.id}

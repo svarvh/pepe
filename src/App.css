@@ -10061,5 +10061,406 @@
   display: none;
 }
 
+/* ==========================================================================
+   SELECT LEARNING PATH VIEW (Dedicated /select-learning-path)
+   Strictly styled to match the green-and-white visual reference design
+   ========================================================================== */
+
+.select-learning-path-viewport {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #F7FAF8;
+  padding: 24px 32px 80px;
+  box-sizing: border-box;
+}
+
+.slp-inner-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+}
+
+.slp-top-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.slp-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #4B5563;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px 6px 0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.slp-back-btn:hover {
+  color: #07865B;
+  transform: translateX(-2px);
+}
+
+.slp-header-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  position: relative;
+  background: transparent;
+}
+
+.slp-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 660px;
+}
+
+.slp-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #07865B;
+  text-transform: uppercase;
+}
+
+.slp-heading {
+  font-size: 2.15rem;
+  font-weight: 800;
+  color: #17221F;
+  line-height: 1.22;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.slp-subtitle {
+  font-size: 0.98rem;
+  color: #66736D;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.slp-hero-banner-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slp-section-block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.slp-cards-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  width: 100%;
+}
+
+.slp-cards-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  width: 100%;
+}
+
+/* School Class Cards (4 in a row) */
+.slp-class-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E6ECE8;
+  border-radius: 20px;
+  padding: 24px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  outline: none;
+}
+
+.slp-class-card:hover {
+  border-color: #07865B;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(7, 134, 91, 0.1);
+}
+
+.slp-class-card.selected {
+  border: 2px solid #07865B;
+  background: #FAFDFB;
+  box-shadow: 0 8px 24px rgba(7, 134, 91, 0.13);
+}
+
+.slp-selected-pill-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #E9F9F0;
+  color: #07865B;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  border: 1px solid #CDEEDD;
+  z-index: 2;
+}
+
+.slp-book-badge-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  height: 90px;
+}
+
+.slp-card-body {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slp-card-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #17221F;
+  margin: 0;
+}
+
+.slp-card-desc {
+  font-size: 0.86rem;
+  color: #66736D;
+  line-height: 1.45;
+  margin: 0;
+  min-height: 38px;
+}
+
+.slp-card-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.slp-circle-arrow-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #E9F9F0;
+  border: 1px solid #CDEEDD;
+  color: #07865B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.slp-circle-arrow-btn:hover,
+.slp-circle-arrow-btn.active,
+.slp-class-card.selected .slp-circle-arrow-btn,
+.slp-exam-card.selected .slp-circle-arrow-btn {
+  background: #07865B;
+  color: #FFFFFF;
+  border-color: #07865B;
+  transform: scale(1.05);
+}
+
+/* Competitive Exam Cards (2 in a row) */
+.slp-exam-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E6ECE8;
+  border-radius: 20px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  outline: none;
+}
+
+.slp-exam-card:hover {
+  border-color: #07865B;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(7, 134, 91, 0.1);
+}
+
+.slp-exam-card.selected {
+  border: 2px solid #07865B;
+  background: #FAFDFB;
+  box-shadow: 0 8px 24px rgba(7, 134, 91, 0.13);
+}
+
+.slp-exam-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #EBF7EE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #D6EFE0;
+}
+
+.slp-exam-card-middle {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slp-chips-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.slp-subject-chip {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #475569;
+  background: #F1F5F3;
+  border: 1px solid #E2E8E5;
+  padding: 3px 10px;
+  border-radius: 9999px;
+}
+
+.slp-exam-card-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bottom Confirmation Bar */
+.slp-confirm-bar {
+  position: sticky;
+  bottom: 18px;
+  margin-top: 8px;
+  background: #FFFFFF;
+  border: 1.5px solid #D8E6DE;
+  border-radius: 16px;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 12px 30px rgba(7, 134, 91, 0.14);
+  z-index: 20;
+}
+
+.slp-confirm-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slp-confirm-eyebrow {
+  font-size: 0.85rem;
+  color: #66736D;
+  font-weight: 500;
+}
+
+.slp-confirm-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #07865B;
+}
+
+.slp-continue-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #07865B;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.98rem;
+  padding: 12px 26px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(7, 134, 91, 0.3);
+}
+
+.slp-continue-btn:hover {
+  background: #056B48;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(7, 134, 91, 0.4);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .slp-cards-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .slp-cards-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .select-learning-path-viewport {
+    padding: 18px 16px 80px;
+  }
+  .slp-header-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .slp-hero-banner-wrap {
+    display: none;
+  }
+  .slp-heading {
+    font-size: 1.7rem;
+  }
+  .slp-cards-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .slp-cards-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .slp-exam-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .slp-exam-card-right {
+    align-self: flex-end;
+  }
+  .slp-confirm-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .slp-continue-btn {
+    justify-content: center;
+  }
+}
+
+
 
 

@@ -210,7 +210,8 @@ export const AuthService = {
         role: user.role,
         avatar: user.avatar,
         title: user.title,
-        targetExam: user.targetExam
+        targetExam: user.targetExam,
+        selectedLearningPath: user.selectedLearningPath || null
       },
       token,
       expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000
@@ -256,6 +257,7 @@ export const AuthService = {
       role: ROLES.STUDENT, // Strictly enforced: student role only
       avatar: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256&h=256`,
       targetExam,
+      selectedLearningPath: null,
       registeredAt: new Date().toISOString(),
       status: "active"
     };
@@ -272,7 +274,8 @@ export const AuthService = {
         email: newUser.email,
         role: newUser.role,
         avatar: newUser.avatar,
-        targetExam: newUser.targetExam
+        targetExam: newUser.targetExam,
+        selectedLearningPath: null
       },
       token,
       expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000
@@ -285,6 +288,44 @@ export const AuthService = {
       user: session.user,
       token
     };
+  },
+
+  // Update student's selected learning path (stored persistently on user account)
+  updateStudentLearningPath(learningPathId) {
+    const session = this.getCurrentSession();
+    if (!session || !session.user) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const users = getStoredUsers();
+    let updatedUser = null;
+    const updatedUsers = users.map(u => {
+      if (u.id === session.user.id || u.email.toLowerCase() === session.user.email.toLowerCase()) {
+        updatedUser = {
+          ...u,
+          selectedLearningPath: learningPathId
+        };
+        return updatedUser;
+      }
+      return u;
+    });
+
+    if (updatedUser) {
+      saveStoredUsers(updatedUsers);
+      session.user.selectedLearningPath = learningPathId;
+      localStorage.setItem(AUTH_STORAGE_KEYS.SESSION, JSON.stringify(session));
+      return { success: true, user: session.user };
+    }
+
+    session.user.selectedLearningPath = learningPathId;
+    localStorage.setItem(AUTH_STORAGE_KEYS.SESSION, JSON.stringify(session));
+    return { success: true, user: session.user };
+  },
+
+  // Get current student's learning path
+  getStudentLearningPath() {
+    const user = this.getCurrentUser();
+    return user ? (user.selectedLearningPath || null) : null;
   },
 
   // Log out current session

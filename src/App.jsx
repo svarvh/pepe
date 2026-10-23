@@ -27,6 +27,7 @@ import AuthModal from "./components/AuthModal";
 import AdminPanel from "./components/AdminPanel";
 import AccessDeniedView from "./components/AccessDeniedView";
 import FacultyPanel from "./components/FacultyPanel";
+import SelectLearningPathView from "./components/SelectLearningPathView";
 import { StorageService } from "./services/storage";
 import { AuthService, ROLES } from "./services/authService";
 import { findTrackByPath, getTrackById, EXAM_TRACKS } from "./data/learningCategories";
@@ -110,18 +111,45 @@ export default function App() {
       return;
     }
 
+    // Mandatory Class/Exam Selection Page: /select-learning-path
+    if (path.startsWith("/select-learning-path") || hash === "#select-learning-path") {
+      let usr = activeUsr;
+      if (!usr) {
+        const autoRes = AuthService.login("student@caplen.edu", "student123");
+        if (autoRes.success) {
+          usr = autoRes.user;
+          setCurrentUser(usr);
+        }
+      }
+      if (!usr) {
+        setTopLevelView("public");
+        setAuthModalMode("login");
+        setAuthRedirectMessage("Please sign in or create an account to choose your learning path.");
+        setIsAuthModalOpen(true);
+        return;
+      }
+      setTopLevelView("student");
+      setCurrentRoute("select-learning-path");
+      return;
+    }
+
     // Dedicated Exam Track URLs: /jee, /neet, /class-12, /class-11, /class-10, /class-9, /ugc-net
     const matchedTrack = findTrackByPath(path) || findTrackByPath(hash.replace(/^#/, "/"));
     if (matchedTrack) {
       StorageService.setActiveCourse(matchedTrack.id);
       setActiveCourse(matchedTrack.id);
 
+      // If authenticated as student, save this path
+      if (activeUsr && activeUsr.role === ROLES.STUDENT) {
+        AuthService.updateStudentLearningPath(matchedTrack.id);
+      }
+
       // Check subroutes e.g. /jee/reading or /jee/practice
       if (path.includes("/reading") || path.includes("/notes") || path.includes("/topics") || hash.includes("reading")) {
-        setReadingTopicConfig({ categoryId: matchedTrack.categoryId });
+        setReadingTopicConfig({ categoryId: matchedTrack.categoryId, pathId: matchedTrack.id });
         setCurrentRoute("topic-reading");
       } else if (path.includes("/practice") || path.includes("/questions") || hash.includes("practice")) {
-        setPracticeTopicConfig({ categoryId: matchedTrack.categoryId });
+        setPracticeTopicConfig({ categoryId: matchedTrack.categoryId, pathId: matchedTrack.id });
         setCurrentRoute("question-practice");
       } else {
         setCurrentRoute("dashboard");
@@ -139,26 +167,36 @@ export default function App() {
     }
 
     if (path.startsWith("/app") || path.startsWith("/dashboard") || path.startsWith("/student") || hash === "#app" || hash === "#dashboard" || hash === "#student") {
-      if (!activeUsr) {
+      let usr = activeUsr;
+      if (!usr) {
         // Auto-login default demo student so /dashboard is immediately accessible
         const autoRes = AuthService.login("student@caplen.edu", "student123");
         if (autoRes.success) {
-          setCurrentUser(autoRes.user);
-          setTopLevelView("student");
-          setCurrentRoute("dashboard");
-          return;
+          usr = autoRes.user;
+          setCurrentUser(usr);
         }
+      }
+
+      if (!usr) {
         setTopLevelView("public");
         setAuthModalMode("login");
         setAuthRedirectMessage("Please sign in or create an account to access the learning dashboard.");
         setIsAuthModalOpen(true);
-      } else if (activeUsr.role === ROLES.ADMIN) {
+      } else if (usr.role === ROLES.ADMIN) {
         setTopLevelView("admin");
-      } else if (activeUsr.role === ROLES.FACULTY) {
+      } else if (usr.role === ROLES.FACULTY) {
         setTopLevelView("faculty");
       } else {
         setTopLevelView("student");
-        setCurrentRoute("dashboard");
+        // Mandatory check: If student has not selected a class or exam, redirect to /select-learning-path
+        if (!usr.selectedLearningPath) {
+          setCurrentRoute("select-learning-path");
+          window.history.replaceState({}, "", "/select-learning-path");
+        } else {
+          StorageService.setActiveCourse(usr.selectedLearningPath);
+          setActiveCourse(usr.selectedLearningPath);
+          setCurrentRoute("dashboard");
+        }
       }
       return;
     }
@@ -210,8 +248,17 @@ export default function App() {
       window.history.pushState({}, "", "/faculty");
     } else {
       setTopLevelView("student");
-      setCurrentRoute("dashboard");
-      window.history.pushState({}, "", "/dashboard");
+      // Mandatory flow: if no class/exam selected, redirect to /select-learning-path
+      if (!authenticatedUser?.selectedLearningPath) {
+        setCurrentRoute("select-learning-path");
+        window.history.pushState({}, "", "/select-learning-path");
+      } else {
+        const path = authenticatedUser.selectedLearningPath;
+        StorageService.setActiveCourse(path);
+        setActiveCourse(path);
+        setCurrentRoute("dashboard");
+        window.history.pushState({}, "", "/dashboard");
+      }
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -225,23 +272,29 @@ export default function App() {
   };
 
   const handleGoToDashboard = () => {
-    if (!currentUser) {
+    let usr = currentUser;
+    if (!usr) {
       const autoRes = AuthService.login("student@caplen.edu", "student123");
       if (autoRes.success) {
-        setCurrentUser(autoRes.user);
+        usr = autoRes.user;
+        setCurrentUser(usr);
         refreshMetrics();
-        setTopLevelView("student");
-        setCurrentRoute("dashboard");
-        window.history.pushState({}, "", "/dashboard");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        handleOpenAuth("login");
         return;
       }
-      handleOpenAuth("login");
-      return;
     }
+
     setTopLevelView("student");
-    setCurrentRoute("dashboard");
-    window.history.pushState({}, "", "/dashboard");
+    if (!usr?.selectedLearningPath) {
+      setCurrentRoute("select-learning-path");
+      window.history.pushState({}, "", "/select-learning-path");
+    } else {
+      StorageService.setActiveCourse(usr.selectedLearningPath);
+      setActiveCourse(usr.selectedLearningPath);
+      setCurrentRoute("dashboard");
+      window.history.pushState({}, "", "/dashboard");
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -298,9 +351,25 @@ export default function App() {
       return;
     }
 
+    // Dedicated /select-learning-path route
+    if (route === "select-learning-path") {
+      setCurrentRoute("select-learning-path");
+      window.history.pushState({}, "", "/select-learning-path");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // Mandatory guard: Topic Reading & Question Practice require an active learning path
+    if ((route === "topic-reading" || route === "question-practice") && !currentUser?.selectedLearningPath) {
+      setCurrentRoute("select-learning-path");
+      window.history.pushState({}, "", "/select-learning-path");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     const currentTrack = getTrackById(activeCourse);
     if (route === "dashboard") {
-      window.history.pushState({}, "", currentTrack.slug);
+      window.history.pushState({}, "", "/dashboard");
     } else if (route === "topic-reading") {
       window.history.pushState({}, "", `${currentTrack.slug}/reading`);
     } else if (route === "question-practice") {
@@ -319,8 +388,28 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Confirm and persist student's chosen class or exam
+  const handleSelectLearningPath = (pathId) => {
+    if (currentUser) {
+      const updateRes = AuthService.updateStudentLearningPath(pathId);
+      if (updateRes.success) {
+        setCurrentUser(updateRes.user);
+      }
+    }
+    StorageService.setActiveCourse(pathId);
+    setActiveCourse(pathId);
+    refreshMetrics();
+
+    setCurrentRoute("dashboard");
+    window.history.pushState({}, "", "/dashboard");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleCourseChange = (courseId) => {
     const track = getTrackById(courseId);
+    if (currentUser) {
+      AuthService.updateStudentLearningPath(track.id);
+    }
     StorageService.setActiveCourse(track.id);
     setActiveCourse(track.id);
     refreshMetrics();
@@ -328,7 +417,13 @@ export default function App() {
   };
 
   const handleStartTopicReading = (config) => {
-    const track = getTrackById(config?.categoryId || activeCourse);
+    if (!currentUser?.selectedLearningPath) {
+      setCurrentRoute("select-learning-path");
+      window.history.pushState({}, "", "/select-learning-path");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const track = getTrackById(config?.categoryId || config?.pathId || activeCourse);
     setReadingTopicConfig(config || { categoryId: track.categoryId });
     setCurrentRoute("topic-reading");
     setIsMobileMenuOpen(false);
@@ -337,7 +432,13 @@ export default function App() {
   };
 
   const handleStartTopicPractice = (config) => {
-    const track = getTrackById(config?.categoryId || activeCourse);
+    if (!currentUser?.selectedLearningPath) {
+      setCurrentRoute("select-learning-path");
+      window.history.pushState({}, "", "/select-learning-path");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const track = getTrackById(config?.categoryId || config?.pathId || activeCourse);
     setPracticeTopicConfig(config || { categoryId: track.categoryId });
     setCurrentRoute("question-practice");
     setIsMobileMenuOpen(false);
@@ -484,6 +585,21 @@ export default function App() {
             />
 
             <div className="route-content-viewport">
+              {currentRoute === "select-learning-path" && (
+                <SelectLearningPathView
+                  currentPath={currentUser?.selectedLearningPath || activeCourse}
+                  onSelectPath={handleSelectLearningPath}
+                  onBackToHome={() => {
+                    if (currentUser?.selectedLearningPath) {
+                      handleNavigate("dashboard");
+                    } else {
+                      handleGoToPublic();
+                    }
+                  }}
+                  user={currentUser || user}
+                />
+              )}
+
               {currentRoute === "dashboard" && (
                 <DashboardView
                   user={user}

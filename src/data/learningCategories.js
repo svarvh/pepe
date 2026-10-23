@@ -480,35 +480,56 @@ export function getTopicVideo(topicId) {
   return TOPIC_VIDEOS_COLLECTION[topicId] || null;
 }
 
-// Helper to get questions for topic, difficulty, or length
+// Helper to get questions strictly filtered for the selected learning path / class
 export function getQuestionsForDrill({ categoryId, subjectId, topicId, subtopic, lengthType, count = 10 }) {
   let pool = [...EXPANDED_QUESTIONS_BANK];
 
+  // 1. Strict Category Scoping (never mix unrelated classes/exams)
+  if (categoryId) {
+    const cat = getStudentCategoryById(categoryId);
+    const validSubjectIds = cat ? cat.subjects.map((s) => s.id) : [];
+    const scoped = pool.filter(
+      (q) =>
+        validSubjectIds.includes(q.subjectId) ||
+        q.categoryId === categoryId ||
+        q.examId === categoryId
+    );
+    // If questions exist in this category, enforce category boundary
+    if (scoped.length > 0) {
+      pool = scoped;
+    }
+  }
+
+  // 2. Subject Filtering
   if (subjectId) {
-    pool = pool.filter(q => q.subjectId === subjectId);
+    const subjectPool = pool.filter((q) => q.subjectId === subjectId);
+    if (subjectPool.length > 0) {
+      pool = subjectPool;
+    }
   }
 
+  // 3. Topic Filtering
   if (topicId) {
-    pool = pool.filter(q => q.topicId === topicId);
+    const topicPool = pool.filter((q) => q.topicId === topicId);
+    if (topicPool.length > 0) {
+      pool = topicPool;
+    }
   }
 
-  // Filter or map by question length / difficulty
-  // Short = quick MCQs, 1-2 marks
-  // Medium = Assertion-reason, numericals, 2-3 marks
-  // Long = Comprehensive, derivations, 4-5 marks
+  // 4. Format / Difficulty Filtering
   if (lengthType === "short") {
-    pool = pool.filter(q => q.marks <= 2 || q.type === "mcq");
+    const filtered = pool.filter((q) => q.marks <= 2 || q.type === "mcq" || q.type === "true_false");
+    if (filtered.length > 0) pool = filtered;
   } else if (lengthType === "medium") {
-    pool = pool.filter(q => q.marks === 3 || q.marks === 4 || q.type === "assertion_reason" || q.type === "numerical");
+    const filtered = pool.filter(
+      (q) => q.marks === 3 || q.marks === 4 || q.type === "assertion_reason" || q.type === "numerical"
+    );
+    if (filtered.length > 0) pool = filtered;
   } else if (lengthType === "long") {
-    pool = pool.filter(q => q.marks >= 4 || q.type === "multiple_select" || q.type === "case_based");
-  }
-
-  // If pool has fewer than requested, fallback to wider pool
-  if (pool.length === 0) {
-    pool = [...EXPANDED_QUESTIONS_BANK];
-    if (subjectId) pool = pool.filter(q => q.subjectId === subjectId);
-    if (pool.length === 0) pool = [...EXPANDED_QUESTIONS_BANK];
+    const filtered = pool.filter(
+      (q) => q.marks >= 4 || q.type === "multiple_select" || q.type === "case_based"
+    );
+    if (filtered.length > 0) pool = filtered;
   }
 
   return pool.slice(0, count);
