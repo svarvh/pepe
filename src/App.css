@@ -9958,4 +9958,108 @@
   }
 }
 
+/* ==========================================================================
+   DEDICATED EXAM TRACK URL ROUTING & PILL STYLING (/jee, /neet, /class-12, etc.)
+   ========================================================================== */
+.track-pills-scroll-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+  scrollbar-width: none;
+}
+.track-pills-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.track-pill-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background-color: #FFFFFF;
+  border: 1px solid #E5ECE8;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #66736D;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.track-pill-item:hover {
+  border-color: #07865B;
+  color: #07865B;
+  background-color: #F7FAF8;
+  transform: translateY(-1px);
+}
+
+.track-pill-item.active {
+  background-color: #07865B;
+  border-color: #07865B;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(7, 134, 91, 0.25);
+}
+
+.track-pill-url {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  opacity: 0.75;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.track-pill-item.active .track-pill-url {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+}
+
+.course-slug-chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #07865B;
+  background-color: #E9F9F0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.landing-nav-link.exam-pill {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-color: #E9F9F0;
+  color: #07865B;
+  border: 1px solid #D2F4E2;
+  transition: all 0.2s ease;
+}
+
+.landing-nav-link.exam-pill:hover {
+  background-color: #07865B;
+  color: #FFFFFF;
+  border-color: #07865B;
+}
+
+.landing-exams-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 0;
+  margin-top: 14px;
+  scrollbar-width: none;
+}
+.landing-exams-strip::-webkit-scrollbar {
+  display: none;
+}
+
+
 

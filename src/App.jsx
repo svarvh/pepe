@@ -29,6 +29,7 @@ import AccessDeniedView from "./components/AccessDeniedView";
 import FacultyPanel from "./components/FacultyPanel";
 import { StorageService } from "./services/storage";
 import { AuthService, ROLES } from "./services/authService";
+import { findTrackByPath, getTrackById, EXAM_TRACKS } from "./data/learningCategories";
 import "./App.css";
 
 export default function App() {
@@ -106,6 +107,34 @@ export default function App() {
       setTopLevelView("public");
       setAuthModalMode("register");
       setIsAuthModalOpen(true);
+      return;
+    }
+
+    // Dedicated Exam Track URLs: /jee, /neet, /class-12, /class-11, /class-10, /class-9, /ugc-net
+    const matchedTrack = findTrackByPath(path) || findTrackByPath(hash.replace(/^#/, "/"));
+    if (matchedTrack) {
+      StorageService.setActiveCourse(matchedTrack.id);
+      setActiveCourse(matchedTrack.id);
+
+      // Check subroutes e.g. /jee/reading or /jee/practice
+      if (path.includes("/reading") || path.includes("/notes") || path.includes("/topics") || hash.includes("reading")) {
+        setReadingTopicConfig({ categoryId: matchedTrack.categoryId });
+        setCurrentRoute("topic-reading");
+      } else if (path.includes("/practice") || path.includes("/questions") || hash.includes("practice")) {
+        setPracticeTopicConfig({ categoryId: matchedTrack.categoryId });
+        setCurrentRoute("question-practice");
+      } else {
+        setCurrentRoute("dashboard");
+      }
+
+      // Ensure authenticated or auto-login default student for seamless access
+      if (!activeUsr) {
+        const autoRes = AuthService.login("student@caplen.edu", "student123");
+        if (autoRes.success) {
+          setCurrentUser(autoRes.user);
+        }
+      }
+      setTopLevelView("student");
       return;
     }
 
@@ -269,6 +298,15 @@ export default function App() {
       return;
     }
 
+    const currentTrack = getTrackById(activeCourse);
+    if (route === "dashboard") {
+      window.history.pushState({}, "", currentTrack.slug);
+    } else if (route === "topic-reading") {
+      window.history.pushState({}, "", `${currentTrack.slug}/reading`);
+    } else if (route === "question-practice") {
+      window.history.pushState({}, "", `${currentTrack.slug}/practice`);
+    }
+
     setCurrentRoute(route);
     setIsMobileMenuOpen(false);
     if (route !== "exam") {
@@ -282,22 +320,28 @@ export default function App() {
   };
 
   const handleCourseChange = (courseId) => {
-    StorageService.setActiveCourse(courseId);
-    setActiveCourse(courseId);
+    const track = getTrackById(courseId);
+    StorageService.setActiveCourse(track.id);
+    setActiveCourse(track.id);
     refreshMetrics();
+    window.history.pushState({}, "", track.slug);
   };
 
   const handleStartTopicReading = (config) => {
-    setReadingTopicConfig(config);
+    const track = getTrackById(config?.categoryId || activeCourse);
+    setReadingTopicConfig(config || { categoryId: track.categoryId });
     setCurrentRoute("topic-reading");
     setIsMobileMenuOpen(false);
+    window.history.pushState({}, "", `${track.slug}/reading`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleStartTopicPractice = (config) => {
-    setPracticeTopicConfig(config);
+    const track = getTrackById(config?.categoryId || activeCourse);
+    setPracticeTopicConfig(config || { categoryId: track.categoryId });
     setCurrentRoute("question-practice");
     setIsMobileMenuOpen(false);
+    window.history.pushState({}, "", `${track.slug}/practice`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -346,15 +390,21 @@ export default function App() {
         <PublicLandingPage
           currentUser={currentUser}
           onOpenAuth={handleOpenAuth}
-          onNavigateToCourse={(courseId) => {
-            StorageService.setActiveCourse(courseId);
-            setActiveCourse(courseId);
-            if (currentUser) {
-              setTopLevelView("student");
-              setCurrentRoute("smart-notes");
-            } else {
-              handleOpenAuth("register");
+          onNavigateToCourse={(courseTarget) => {
+            const track = getTrackById(courseTarget);
+            StorageService.setActiveCourse(track.id);
+            setActiveCourse(track.id);
+            refreshMetrics();
+            if (!currentUser) {
+              const autoRes = AuthService.login("student@caplen.edu", "student123");
+              if (autoRes.success) {
+                setCurrentUser(autoRes.user);
+              }
             }
+            setTopLevelView("student");
+            setCurrentRoute("dashboard");
+            window.history.pushState({}, "", track.slug);
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
           onGoToDashboard={handleGoToDashboard}
           onGoToFaculty={handleGoToFaculty}
@@ -438,6 +488,8 @@ export default function App() {
                 <DashboardView
                   user={user}
                   statistics={statistics}
+                  activeCourse={activeCourse}
+                  onCourseChange={handleCourseChange}
                   onNavigate={handleNavigate}
                   onStartReadingTopic={handleStartTopicReading}
                   onStartPracticeTopic={handleStartTopicPractice}
@@ -446,7 +498,7 @@ export default function App() {
 
               {currentRoute === "topic-reading" && (
                 <TopicReadingView
-                  initialCategoryId={readingTopicConfig?.categoryId || "iit"}
+                  initialCategoryId={readingTopicConfig?.categoryId || getTrackById(activeCourse).categoryId || "iit"}
                   initialTopicId={readingTopicConfig?.id || readingTopicConfig?.topicId || null}
                   onNavigate={handleNavigate}
                   onStartPracticeWithTopic={handleStartTopicPractice}
@@ -456,7 +508,7 @@ export default function App() {
 
               {currentRoute === "question-practice" && (
                 <QuestionPracticeView
-                  initialParams={practiceTopicConfig}
+                  initialParams={practiceTopicConfig || { categoryId: getTrackById(activeCourse).categoryId }}
                   onNavigate={handleNavigate}
                   onReviewTopicNotes={handleStartTopicReading}
                 />

@@ -131,7 +131,7 @@ export default function Header({
               >
                 <div className="course-item-title-row">
                   <strong>{c.name}</strong>
-                  <span className="badge badge-sm">{c.badge}</span>
+                  <span className="course-slug-chip">{c.slug || `/${c.id}`}</span>
                 </div>
                 <span className="course-item-desc">{c.description}</span>
               </button>

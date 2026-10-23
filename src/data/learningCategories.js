@@ -513,3 +513,274 @@ export function getQuestionsForDrill({ categoryId, subjectId, topicId, subtopic,
 
   return pool.slice(0, count);
 }
+
+// ==========================================================================
+// DEDICATED EXAM TRACKS & URL ROUTING REGISTRY
+// Provides separate clean URLs: /jee, /neet, /class-12, /class-11, /class-10, /class-9, /ugc-net
+// ==========================================================================
+export const EXAM_TRACKS = [
+  {
+    id: "jee",
+    slug: "/jee",
+    aliases: ["/iit", "/iit-jee", "/jee-advanced", "/jee-main"],
+    categoryId: "iit",
+    name: "IIT-JEE (Main & Advanced)",
+    shortName: "IIT / JEE",
+    badge: "Engineering",
+    tagline: "Rotational Dynamics, Nernst Applications & Advanced Calculus",
+    color: "#07865B",
+    iconName: "Compass",
+    subjectsCount: 3,
+    description: "Deep conceptual problem-solving, advanced numericals, rotational mechanics & calculus.",
+    defaultRecent: [
+      {
+        id: "topic-jee-rot",
+        title: "Rotational Dynamics & Rigid Bodies",
+        subject: "Physics (JEE Advanced)",
+        grade: "JEE Advanced",
+        iconType: "physics",
+        categoryId: "iit",
+        subjectId: "jee_phys"
+      },
+      {
+        id: "topic-jee-thermo",
+        title: "Thermodynamics & Electrochemistry",
+        subject: "Chemistry (Physical)",
+        grade: "JEE Main",
+        iconType: "chemistry",
+        categoryId: "iit",
+        subjectId: "jee_chem"
+      }
+    ]
+  },
+  {
+    id: "neet",
+    slug: "/neet",
+    aliases: ["/medical", "/neet-ug"],
+    categoryId: "neet",
+    name: "Medical / NEET (UG)",
+    shortName: "Medical / NEET",
+    badge: "Medical Entrance",
+    tagline: "100% NCERT Biology, Organic Chemistry & Physics",
+    color: "#059669",
+    iconName: "Stethoscope",
+    subjectsCount: 3,
+    description: "100% NCERT line-by-line coverage, human physiology, genetics, and organic chemistry.",
+    defaultRecent: [
+      {
+        id: "topic-bio-evolution",
+        title: "Evolution & Natural Selection",
+        subject: "Biology (NCERT)",
+        grade: "NEET 2026",
+        iconType: "biology",
+        categoryId: "neet",
+        subjectId: "bio_12"
+      },
+      {
+        id: "topic-chem-nernst",
+        title: "Galvanic Cells & The Nernst Equation",
+        subject: "Chemistry (Medical)",
+        grade: "Pre-Med",
+        iconType: "chemistry",
+        categoryId: "neet",
+        subjectId: "chem_12"
+      }
+    ]
+  },
+  {
+    id: "class_12",
+    slug: "/class-12",
+    aliases: ["/class12", "/class-xii", "/xii", "/cbse-12", "/class11_12"],
+    categoryId: "class_12",
+    name: "Class 12 (CBSE & Boards)",
+    shortName: "Class 12",
+    badge: "Senior Secondary",
+    tagline: "Complete Class 12 NCERT, Board PYQs & Worked Derivations",
+    color: "#047857",
+    iconName: "GraduationCap",
+    subjectsCount: 4,
+    description: "Complete Class 12 board syllabus, derivations, step-by-step marking schemes.",
+    defaultRecent: [
+      {
+        id: "topic-bio-evolution-12",
+        title: "Mechanism of Evolution: Natural Selection",
+        subject: "Biology (Class 12 NCERT)",
+        grade: "Class 12",
+        iconType: "biology",
+        categoryId: "class_12",
+        subjectId: "bio_12"
+      },
+      {
+        id: "topic-phys-photoelectric-12",
+        title: "Modern Physics & Dual Nature of Radiation",
+        subject: "Physics",
+        grade: "Class 12",
+        iconType: "physics",
+        categoryId: "class_12",
+        subjectId: "phys_12"
+      }
+    ]
+  },
+  {
+    id: "class_11",
+    slug: "/class-11",
+    aliases: ["/class11", "/class-xi", "/xi", "/cbse-11"],
+    categoryId: "class_11",
+    name: "Class 11 (NCERT & Boards)",
+    shortName: "Class 11",
+    badge: "Higher Secondary",
+    tagline: "Foundational Mechanics, Chemical Bonding & Cell Structure",
+    color: "#059669",
+    iconName: "Layers",
+    subjectsCount: 4,
+    description: "Build an unshakable conceptual base in Class 11 mechanics, chemical bonding, and cell biology.",
+    defaultRecent: [
+      {
+        id: "topic-phys-laws",
+        title: "Laws of Motion & Friction Dynamics",
+        subject: "Physics (Class 11)",
+        grade: "Class 11",
+        iconType: "physics",
+        categoryId: "class_11",
+        subjectId: "phys_11"
+      },
+      {
+        id: "topic-chem-bonding",
+        title: "Chemical Bonding & Molecular Geometry",
+        subject: "Chemistry",
+        grade: "Class 11",
+        iconType: "chemistry",
+        categoryId: "class_11",
+        subjectId: "chem_11"
+      }
+    ]
+  },
+  {
+    id: "class_10",
+    slug: "/class-10",
+    aliases: ["/class10", "/class-x", "/x", "/class9_10", "/cbse-10"],
+    categoryId: "class_10",
+    name: "Class 10 (Board Foundations)",
+    shortName: "Class 10",
+    badge: "Secondary Board",
+    tagline: "CBSE Class 10 Science & Mathematics with Exemplar Solutions",
+    color: "#07865B",
+    iconName: "BookOpen",
+    subjectsCount: 2,
+    description: "Strong conceptual foundations, NCERT exemplars, and board preparation.",
+    defaultRecent: [
+      {
+        id: "topic-sci10-light",
+        title: "Light: Reflection & Refraction Laws",
+        subject: "Science (Class 10)",
+        grade: "Class 10",
+        iconType: "physics",
+        categoryId: "class_10",
+        subjectId: "sci_10"
+      },
+      {
+        id: "topic-math10-quad",
+        title: "Quadratic Equations & Polynomial Roots",
+        subject: "Mathematics",
+        grade: "Class 10",
+        iconType: "math",
+        categoryId: "class_10",
+        subjectId: "math_10"
+      }
+    ]
+  },
+  {
+    id: "class_9",
+    slug: "/class-9",
+    aliases: ["/class9", "/class-ix", "/ix", "/cbse-9"],
+    categoryId: "class_9",
+    name: "Class 9 (Foundations)",
+    shortName: "Class 9",
+    badge: "Secondary Foundation",
+    tagline: "Fundamental Science, Motion, Structure of the Atom & Math",
+    color: "#10b981",
+    iconName: "BookOpen",
+    subjectsCount: 2,
+    description: "Master foundational concepts in physics, chemistry, and biology to prepare for higher grades.",
+    defaultRecent: [
+      {
+        id: "topic-sci9-motion",
+        title: "Motion & Equations of Uniform Acceleration",
+        subject: "Science (Class 9)",
+        grade: "Class 9",
+        iconType: "physics",
+        categoryId: "class_9",
+        subjectId: "sci_9"
+      },
+      {
+        id: "topic-sci9-atom",
+        title: "Structure of the Atom & Chemical Formulas",
+        subject: "Science (Class 9)",
+        grade: "Class 9",
+        iconType: "chemistry",
+        categoryId: "class_9",
+        subjectId: "chem_9"
+      }
+    ]
+  },
+  {
+    id: "ugc_net",
+    slug: "/ugc-net",
+    aliases: ["/net", "/ugc"],
+    categoryId: "iit",
+    name: "UGC-NET (Paper 1 & Paper 2)",
+    shortName: "UGC-NET",
+    badge: "Lectureship & JRF",
+    tagline: "Teaching Aptitude, Research Methodology & Higher Education",
+    color: "#075B43",
+    iconName: "Award",
+    subjectsCount: 2,
+    description: "Teaching aptitude, research methodology, higher education, and subject mastery.",
+    defaultRecent: [
+      {
+        id: "topic-net-research",
+        title: "Research Methodology & Aptitude",
+        subject: "Paper 1 (General)",
+        grade: "UGC-NET",
+        iconType: "general",
+        categoryId: "iit",
+        subjectId: "net_paper1"
+      },
+      {
+        id: "topic-net-teaching",
+        title: "Higher Education System & Governance",
+        subject: "Paper 1",
+        grade: "UGC-NET",
+        iconType: "general",
+        categoryId: "iit",
+        subjectId: "net_paper1"
+      }
+    ]
+  }
+];
+
+export function findTrackByPath(pathname) {
+  if (!pathname) return null;
+  const clean = pathname.toLowerCase().split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+  for (const track of EXAM_TRACKS) {
+    if (clean === track.slug || clean.startsWith(track.slug + "/")) {
+      return track;
+    }
+    for (const alias of track.aliases) {
+      if (clean === alias || clean.startsWith(alias + "/")) {
+        return track;
+      }
+    }
+  }
+  return null;
+}
+
+export function getTrackById(trackId) {
+  return EXAM_TRACKS.find(t =>
+    t.id === trackId ||
+    t.slug === trackId ||
+    t.categoryId === trackId ||
+    t.aliases?.includes(trackId)
+  ) || EXAM_TRACKS[0];
+}
+

@@ -258,7 +258,14 @@ export const StorageService = {
     return COURSES_CATALOG;
   },
   getCourseById(courseId) {
-    return COURSES_CATALOG.find(c => c.id === courseId) || COURSES_CATALOG[0];
+    if (!courseId) return COURSES_CATALOG[0];
+    const match = COURSES_CATALOG.find(c =>
+      c.id === courseId ||
+      c.slug === courseId ||
+      c.categoryId === courseId ||
+      c.aliases?.includes(courseId)
+    );
+    return match || COURSES_CATALOG[0];
   },
   getSyllabusTree(courseId) {
     const cid = courseId || this.getActiveCourse();

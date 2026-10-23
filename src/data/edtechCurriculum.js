@@ -7,40 +7,88 @@
 
 export const COURSES_CATALOG = [
   {
-    id: "class11_12",
-    name: "Class 11 & 12 (NCERT & Boards)",
-    badge: "NCERT Foundation",
-    category: "School Education",
-    description: "Complete NCERT-based syllabus for Class 11-12 Boards & competitive foundation.",
-    subjects: ["bio_12", "chem_12", "phys_12", "math_12"],
-    targetExams: ["CBSE Board", "ISC", "State Boards", "NEET Foundation"]
-  },
-  {
     id: "jee",
+    slug: "/jee",
+    aliases: ["/iit", "/iit-jee", "/jee-advanced", "/jee-main"],
+    categoryId: "iit",
     name: "IIT-JEE (Main & Advanced)",
-    badge: "Engineering Entrance",
+    badge: "Engineering",
     category: "Competitive Entrance",
-    description: "Rigorous high-difficulty problem solving, PYQs, numericals, and concept shortcuts.",
+    description: "Rigorous high-difficulty problem solving, rotational dynamics, PYQs & advanced calculus.",
     subjects: ["jee_phys", "jee_chem", "jee_math"],
     targetExams: ["JEE Main 2026", "JEE Advanced 2026", "BITSAT"]
   },
   {
+    id: "neet",
+    slug: "/neet",
+    aliases: ["/medical", "/neet-ug"],
+    categoryId: "neet",
+    name: "Medical / NEET (UG)",
+    badge: "Medical Entrance",
+    category: "Competitive Entrance",
+    description: "100% NCERT line-by-line coverage, human physiology, genetics, and organic chemistry.",
+    subjects: ["bio_12", "chem_12", "phys_12"],
+    targetExams: ["NEET UG 2026", "AIIMS Foundation", "State Pre-Med"]
+  },
+  {
+    id: "class_12",
+    slug: "/class-12",
+    aliases: ["/class12", "/class-xii", "/xii", "class11_12", "/class11_12"],
+    categoryId: "class_12",
+    name: "Class 12 (NCERT & CBSE Boards)",
+    badge: "Class 12",
+    category: "Senior Secondary",
+    description: "Complete NCERT syllabus for Class 12 Boards with derivations, marking schemes & PYQs.",
+    subjects: ["bio_12", "chem_12", "phys_12", "math_12"],
+    targetExams: ["CBSE Board", "ISC", "State Boards"]
+  },
+  {
+    id: "class_11",
+    slug: "/class-11",
+    aliases: ["/class11", "/class-xi", "/xi"],
+    categoryId: "class_11",
+    name: "Class 11 (NCERT & Boards)",
+    badge: "Class 11",
+    category: "Higher Secondary",
+    description: "Build an unshakable conceptual base in Class 11 mechanics, chemical bonding, and cell biology.",
+    subjects: ["phys_11", "chem_11", "bio_11", "math_11"],
+    targetExams: ["CBSE Class 11", "Competitive Foundations"]
+  },
+  {
+    id: "class_10",
+    slug: "/class-10",
+    aliases: ["/class10", "/class-x", "/x", "class9_10", "/class9_10"],
+    categoryId: "class_10",
+    name: "Class 10 (Board Foundations)",
+    badge: "Class 10",
+    category: "Secondary School",
+    description: "Strong conceptual foundations, NCERT exemplars, light, electricity, and quadratic equations.",
+    subjects: ["sci_10", "math_10"],
+    targetExams: ["CBSE Class 10 Board", "NTSE", "Olympiads"]
+  },
+  {
+    id: "class_9",
+    slug: "/class-9",
+    aliases: ["/class9", "/class-ix", "/ix"],
+    categoryId: "class_9",
+    name: "Class 9 (Foundations)",
+    badge: "Class 9",
+    category: "Secondary School",
+    description: "Foundational physics, chemistry, and biology with step-by-step NCERT explanations.",
+    subjects: ["sci_9", "math_9"],
+    targetExams: ["CBSE Class 9", "Foundation Olympiads"]
+  },
+  {
     id: "ugc_net",
+    slug: "/ugc-net",
+    aliases: ["/net", "/ugc"],
+    categoryId: "iit",
     name: "UGC-NET (Paper 1 & Paper 2)",
     badge: "Lectureship & JRF",
     category: "National Eligibility Test",
     description: "Teaching aptitude, research methodology, higher education, and subject mastery.",
     subjects: ["net_paper1", "net_cs"],
     targetExams: ["UGC-NET Dec/June", "SET / SLET", "CSIR-NET"]
-  },
-  {
-    id: "class9_10",
-    name: "Class 9 & 10 (Board Foundations)",
-    badge: "Secondary School",
-    category: "School Education",
-    description: "Strong conceptual foundations, NCERT exemplars, and board preparation.",
-    subjects: ["sci_10", "math_10"],
-    targetExams: ["CBSE Class 10 Board", "NTSE", "Olympiads"]
   }
 ];
 

@@ -50,17 +50,26 @@ export default function PublicLandingPage({
           </div>
 
           <nav className="landing-nav-links">
+            <button onClick={() => onNavigateToCourse("/jee")} className="landing-nav-link exam-pill" title="IIT-JEE Dedicated Portal (/jee)">
+              JEE
+            </button>
+            <button onClick={() => onNavigateToCourse("/neet")} className="landing-nav-link exam-pill" title="NEET Medical Dedicated Portal (/neet)">
+              NEET
+            </button>
+            <button onClick={() => onNavigateToCourse("/class-12")} className="landing-nav-link exam-pill" title="Class 12 Boards Portal (/class-12)">
+              Class 12
+            </button>
+            <button onClick={() => onNavigateToCourse("/class-10")} className="landing-nav-link exam-pill" title="Class 10 Foundations Portal (/class-10)">
+              Class 10
+            </button>
+            <button onClick={() => scrollToSection("popular-goals")} className="landing-nav-link">
+              All Tracks
+            </button>
             <button onClick={() => scrollToSection("features")} className="landing-nav-link">
               Features
             </button>
-            <button onClick={() => scrollToSection("popular-goals")} className="landing-nav-link">
-              Popular Goals
-            </button>
             <button onClick={() => scrollToSection("how-it-works")} className="landing-nav-link">
               How It Works
-            </button>
-            <button onClick={() => scrollToSection("why-caplen")} className="landing-nav-link">
-              Why Caplen
             </button>
             <button onClick={onGoToFaculty} className="landing-nav-link" title="Open Faculty Panel (/faculty)">
               Faculty
@@ -200,43 +209,43 @@ export default function PublicLandingPage({
               </div>
             </div>
 
-            {/* Platform Feature Highlight Strip (Replaces the question preview) */}
+            {/* Platform Feature Highlight Strip: Direct 1-Click Track Portals */}
             <div className="hero-platform-showcase-card">
               <div className="showcase-card-header">
-                <div className="showcase-pill-title">STUDENT LEARNING ECOSYSTEM</div>
-                <span className="showcase-subtitle">4 Academic Tracks • 10+ Question Types</span>
+                <div className="showcase-pill-title">DEDICATED EXAM TRACKS</div>
+                <span className="showcase-subtitle">Separate URLs for JEE • NEET • Boards • UGC-NET</span>
               </div>
 
               <div className="showcase-tracks-row">
-                <div className="showcase-track-item" onClick={() => onOpenAuth("register")}>
+                <div className="showcase-track-item" onClick={() => onNavigateToCourse("/jee")} title="Open /jee">
                   <span className="track-number">01</span>
                   <div>
-                    <strong>Class 9–10 Foundations</strong>
-                    <small>CBSE Science & Mathematics</small>
+                    <strong>IIT-JEE (Main & Adv)</strong>
+                    <small>/jee • Rotational & Calculus</small>
                   </div>
                 </div>
 
-                <div className="showcase-track-item" onClick={() => onOpenAuth("register")}>
+                <div className="showcase-track-item" onClick={() => onNavigateToCourse("/neet")} title="Open /neet">
                   <span className="track-number">02</span>
                   <div>
-                    <strong>Class 11–12 NCERT</strong>
-                    <small>Physics, Chemistry, Biology</small>
+                    <strong>Medical / NEET (UG)</strong>
+                    <small>/neet • NCERT Bio & Organic</small>
                   </div>
                 </div>
 
-                <div className="showcase-track-item" onClick={() => onOpenAuth("register")}>
+                <div className="showcase-track-item" onClick={() => onNavigateToCourse("/class-12")} title="Open /class-12">
                   <span className="track-number">03</span>
                   <div>
-                    <strong>IIT-JEE Main & Adv</strong>
-                    <small>Mechanics, Electrodynamics & PYQs</small>
+                    <strong>Class 12 CBSE & Boards</strong>
+                    <small>/class-12 • Derivations & PYQs</small>
                   </div>
                 </div>
 
-                <div className="showcase-track-item" onClick={() => onOpenAuth("register")}>
+                <div className="showcase-track-item" onClick={() => onNavigateToCourse("/class-10")} title="Open /class-10">
                   <span className="track-number">04</span>
                   <div>
-                    <strong>UGC-NET Paper 1 & 2</strong>
-                    <small>Research & Teaching Aptitude</small>
+                    <strong>Class 10 Foundations</strong>
+                    <small>/class-10 • Science & Mathematics</small>
                   </div>
                 </div>
               </div>
@@ -263,13 +272,17 @@ export default function PublicLandingPage({
                 className="goal-card"
                 onClick={() => {
                   if (onNavigateToCourse) {
-                    onNavigateToCourse(course.id);
+                    onNavigateToCourse(course.slug || course.id);
                   } else {
                     onOpenAuth("register");
                   }
                 }}
+                title={`Open ${course.name} at ${course.slug || `/${course.id}`}`}
               >
-                <div className="goal-badge-strip">{course.examType}</div>
+                <div className="goal-badge-strip">
+                  <span>{course.badge || course.category}</span>
+                  <span className="course-slug-chip">{course.slug || `/${course.id}`}</span>
+                </div>
                 <h3 className="goal-title">{course.name}</h3>
                 <p className="goal-desc">{course.description}</p>
                 <div className="goal-meta-row">
@@ -281,7 +294,7 @@ export default function PublicLandingPage({
                   type="button"
                   className="goal-action-btn"
                 >
-                  <span>Start Preparing</span>
+                  <span>Enter {course.slug || course.name}</span>
                   <ArrowRight size={15} />
                 </button>
               </div>
@@ -549,10 +562,13 @@ export default function PublicLandingPage({
           <div className="footer-col">
             <h4 className="footer-heading">Academic Tracks</h4>
             <ul className="footer-links">
-              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("class9_10")}>Class 9–10 Foundations</button></li>
-              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("class11_12")}>Class 11–12 NCERT</button></li>
-              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("jee_advanced")}>IIT-JEE Main & Advanced</button></li>
-              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("ugc_net")}>UGC-NET Paper 1 & 2</button></li>
+              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("/jee")}>IIT-JEE Main & Advanced (/jee)</button></li>
+              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("/neet")}>Medical / NEET (UG) (/neet)</button></li>
+              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("/class-12")}>Class 12 Boards (/class-12)</button></li>
+              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("/class-11")}>Class 11 NCERT (/class-11)</button></li>
+              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("/class-10")}>Class 10 Foundations (/class-10)</button></li>
+              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("/class-9")}>Class 9 Foundations (/class-9)</button></li>
+              <li><button onClick={() => onNavigateToCourse && onNavigateToCourse("/ugc-net")}>UGC-NET Paper 1 & 2 (/ugc-net)</button></li>
             </ul>
           </div>
 
