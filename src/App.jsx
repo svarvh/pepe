@@ -3,6 +3,8 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import BottomNav from "./components/BottomNav";
 import DashboardView from "./components/DashboardView";
+import TopicReadingView from "./components/TopicReadingView";
+import QuestionPracticeView from "./components/QuestionPracticeView";
 import PracticeView from "./components/PracticeView";
 import SmartNotesView from "./components/SmartNotesView";
 import TopicVideosView from "./components/TopicVideosView";
@@ -47,6 +49,8 @@ export default function App() {
   const [activeCourse, setActiveCourse] = useState(StorageService.getActiveCourse());
   const [practiceSubject, setPracticeSubject] = useState(null);
   const [practiceQuestions, setPracticeQuestions] = useState(null);
+  const [readingTopicConfig, setReadingTopicConfig] = useState(null);
+  const [practiceTopicConfig, setPracticeTopicConfig] = useState(null);
   const [selectedTopicVideo, setSelectedTopicVideo] = useState("topic-bio-evolution");
   const [activeExamConfig, setActiveExamConfig] = useState(null);
   const [latestExamResult, setLatestExamResult] = useState(StorageService.getLatestTestResult());
@@ -263,6 +267,20 @@ export default function App() {
     refreshMetrics();
   };
 
+  const handleStartTopicReading = (config) => {
+    setReadingTopicConfig(config);
+    setCurrentRoute("topic-reading");
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleStartTopicPractice = (config) => {
+    setPracticeTopicConfig(config);
+    setCurrentRoute("question-practice");
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleStartPracticeSubject = (subject) => {
     setPracticeSubject(subject);
     setPracticeQuestions(null);
@@ -401,7 +419,26 @@ export default function App() {
                   user={user}
                   statistics={statistics}
                   onNavigate={handleNavigate}
-                  onStartPracticeSubject={handleStartPracticeSubject}
+                  onStartReadingTopic={handleStartTopicReading}
+                  onStartPracticeTopic={handleStartTopicPractice}
+                />
+              )}
+
+              {currentRoute === "topic-reading" && (
+                <TopicReadingView
+                  initialCategoryId={readingTopicConfig?.categoryId || "iit"}
+                  initialTopicId={readingTopicConfig?.id || readingTopicConfig?.topicId || null}
+                  onNavigate={handleNavigate}
+                  onStartPracticeWithTopic={handleStartTopicPractice}
+                  onOpenTermDrawer={(termId) => setGlobalTermId(termId)}
+                />
+              )}
+
+              {currentRoute === "question-practice" && (
+                <QuestionPracticeView
+                  initialParams={practiceTopicConfig}
+                  onNavigate={handleNavigate}
+                  onReviewTopicNotes={handleStartTopicReading}
                 />
               )}
 

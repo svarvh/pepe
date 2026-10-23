@@ -25,20 +25,12 @@ import {
 } from "lucide-react";
 
 export default function Sidebar({ currentRoute, onNavigate, onLogout, onGoHome, isMobileOpen, onCloseMobile }) {
+  // Streamlined student navigation strictly adhering to the 5 recommended options
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "smart-notes", label: "Smart Notes & Terms", icon: BookOpen, badge: "Module A" },
-    { id: "videos", label: "Topic Videos", icon: Video, badge: "Module C" },
-    { id: "practice", label: "Practice Questions", icon: Target, badge: "10+ / Topic" },
-    { id: "test-builder", label: "Custom Test Builder", icon: Sliders, badge: "Module D" },
-    { id: "results", label: "Instant Results & Score", icon: Trophy, badge: "Section 4" },
-    { id: "doubt-solver", label: "AI Doubt Assistant", icon: Sparkles, badge: "NCERT" },
-    { id: "revision", label: "Revision & Notebook", icon: RotateCcw },
-    { id: "pyq", label: "Previous Year Papers", icon: FileText },
-    { id: "topics", label: "Important Topics", icon: BookmarkCheck },
-    { id: "ai-generator", label: "Question Generator", icon: Sparkles },
-    { id: "self-generator", label: "Custom Questions", icon: PenTool },
-    { id: "analytics", label: "Student Progress", icon: BarChart2 },
+    { id: "dashboard", label: "Home", icon: LayoutDashboard },
+    { id: "topic-reading", label: "Topic Reading", icon: BookOpen, badge: "Learn" },
+    { id: "question-practice", label: "Question Practice", icon: Target, badge: "Practice" },
+    { id: "analytics", label: "My Progress", icon: BarChart2 },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 

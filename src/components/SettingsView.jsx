@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import {
   Settings as SettingsIcon,
   User,
-  Cpu,
+  Target,
   Sliders,
   Database,
   Save,
   CheckCircle,
-  Eye,
-  EyeOff,
   RefreshCw,
   Download,
   AlertTriangle
@@ -19,10 +17,7 @@ import { EXAMS_CATALOG } from "../data/mockData";
 export default function SettingsView({ user, onUserUpdate }) {
   const [profile, setProfile] = useState(user);
   const [settings, setSettings] = useState(StorageService.getSettings());
-  const [showKey, setShowKey] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [testingAPI, setTestingAPI] = useState(false);
-  const [testResult, setTestResult] = useState(null);
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
@@ -36,48 +31,6 @@ export default function SettingsView({ user, onUserUpdate }) {
     StorageService.saveSettings(settings);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 2500);
-  };
-
-  const handleTestAPI = async () => {
-    setTestingAPI(true);
-    setTestResult(null);
-
-    if (settings.aiProvider === "demo") {
-      setTimeout(() => {
-        setTestingAPI(false);
-        setTestResult({ success: true, message: "Demo Engine is ready! Generates high-fidelity syllabus questions offline." });
-      }, 600);
-      return;
-    }
-
-    if (!settings.apiKey || settings.apiKey.trim() === "") {
-      setTestingAPI(false);
-      setTestResult({ success: false, message: "Please provide a valid API key for live generation." });
-      return;
-    }
-
-    // Live test ping
-    try {
-      if (settings.aiProvider === "gemini") {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.apiKey}`;
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: "Ping test" }] }] })
-        });
-        if (res.ok) {
-          setTestResult({ success: true, message: "Google Gemini API connected and verified!" });
-        } else {
-          setTestResult({ success: false, message: `Gemini API returned code ${res.status}. Check API key.` });
-        }
-      } else {
-        setTestResult({ success: true, message: "API key stored securely for generation requests." });
-      }
-    } catch (err) {
-      setTestResult({ success: false, message: `Network error: ${err.message}` });
-    } finally {
-      setTestingAPI(false);
-    }
   };
 
   const handleExportAllData = () => {
@@ -114,7 +67,7 @@ export default function SettingsView({ user, onUserUpdate }) {
           <div>
             <h2 className="section-title">Settings & Configuration</h2>
             <p className="settings-desc">
-              Manage student profile, target examination goals, AI generation keys, and study preferences.
+              Manage your student profile, target examination goals, study habits, and learning preferences.
             </p>
           </div>
         </div>
@@ -184,76 +137,64 @@ export default function SettingsView({ user, onUserUpdate }) {
           </form>
         </div>
 
-        {/* AI Provider Config */}
+        {/* Student Learning Goals */}
         <div className="settings-card">
           <div className="settings-card-header">
-            <Cpu size={18} className="card-header-icon" />
-            <h3 className="card-title">AI Provider & API Keys</h3>
+            <Target size={18} className="card-header-icon" />
+            <h3 className="card-title">Learning Goals & Daily Targets</h3>
           </div>
 
           <div className="settings-form">
             <div className="form-group-block">
-              <label className="form-label">Question Generation Engine</label>
+              <label className="form-label">Daily Question Practice Target</label>
               <select
                 className="custom-input"
-                value={settings.aiProvider}
-                onChange={(e) => setSettings({ ...settings, aiProvider: e.target.value })}
+                value={settings.dailyTarget || "25"}
+                onChange={(e) => setSettings({ ...settings, dailyTarget: e.target.value })}
               >
-                <option value="demo">High-Fidelity Demo Engine (Curated & Offline)</option>
-                <option value="gemini">Google Gemini API (1.5 Flash / Pro)</option>
-                <option value="openai">OpenAI API (GPT-4o / GPT-4o-mini)</option>
-                <option value="anthropic">Anthropic Claude (Claude 3.5 Sonnet)</option>
+                <option value="15">15 Questions / day (Light Practice)</option>
+                <option value="25">25 Questions / day (Recommended Daily Goal)</option>
+                <option value="40">40 Questions / day (Intensive Prep)</option>
+                <option value="60">60 Questions / day (Exam Sprint)</option>
               </select>
             </div>
 
-            {settings.aiProvider !== "demo" && (
-              <div className="form-group-block">
-                <label className="form-label">API Key</label>
-                <div className="password-input-wrap">
-                  <input
-                    type={showKey ? "text" : "password"}
-                    className="custom-input"
-                    placeholder={`Enter your ${settings.aiProvider} API key...`}
-                    value={settings.apiKey}
-                    onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowKey(!showKey)}
-                  >
-                    {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                <span className="input-hint">Keys are stored locally in your browser storage and never sent elsewhere.</span>
-              </div>
-            )}
-
-            <div className="api-test-row">
-              <button
-                type="button"
-                className="pill-btn pill-btn-white"
-                onClick={handleTestAPI}
-                disabled={testingAPI}
+            <div className="form-group-block">
+              <label className="form-label">Primary Subject Focus</label>
+              <select
+                className="custom-input"
+                value={settings.primarySubject || "all"}
+                onChange={(e) => setSettings({ ...settings, primarySubject: e.target.value })}
               >
-                {testingAPI ? <RefreshCw size={14} className="spin-icon" /> : null}
-                <span>{testingAPI ? "Testing..." : "Test Connection"}</span>
-              </button>
-
-              <button
-                type="button"
-                className="pill-btn pill-btn-dark"
-                onClick={handleSaveSettings}
-              >
-                <Save size={15} /> Save Provider
-              </button>
+                <option value="all">Balanced (All Curriculum Tracks)</option>
+                <option value="biology">Biology & Medical Foundations</option>
+                <option value="physics">Physics: Mechanics & Waves</option>
+                <option value="chemistry">Chemistry & Organic Mechanisms</option>
+                <option value="mathematics">Mathematics: Calculus & Limits</option>
+              </select>
             </div>
 
-            {testResult && (
-              <div className={`test-feedback-box ${testResult.success ? "success" : "error"} fade-in`}>
-                <span>{testResult.message}</span>
-              </div>
-            )}
+            <div className="form-group-block">
+              <label className="form-label">Revision Schedule Preference</label>
+              <select
+                className="custom-input"
+                value={settings.revisionSchedule || "evening"}
+                onChange={(e) => setSettings({ ...settings, revisionSchedule: e.target.value })}
+              >
+                <option value="evening">Evening Review (Daily at 8:00 PM)</option>
+                <option value="morning">Morning Concept Drill (Daily at 7:00 AM)</option>
+                <option value="weekend">Weekend Comprehensive Marathon</option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              className="pill-btn pill-btn-dark"
+              onClick={handleSaveSettings}
+              style={{ marginTop: 8 }}
+            >
+              <Save size={15} /> Save Learning Goals
+            </button>
           </div>
         </div>
 

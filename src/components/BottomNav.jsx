@@ -10,11 +10,10 @@ import {
 
 export default function BottomNav({ currentRoute, onNavigate, onOpenMenu }) {
   const tabs = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "smart-notes", label: "Notes", icon: BookOpen },
-    { id: "practice", label: "Practice", icon: Target },
-    { id: "test-builder", label: "Tests", icon: Sliders },
-    { id: "results", label: "Results", icon: Trophy },
+    { id: "dashboard", label: "Home", icon: LayoutDashboard },
+    { id: "topic-reading", label: "Reading", icon: BookOpen },
+    { id: "question-practice", label: "Practice", icon: Target },
+    { id: "analytics", label: "Progress", icon: Trophy },
   ];
 
   return (
