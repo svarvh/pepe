@@ -19,7 +19,13 @@ export default function DashboardView({
   onStartPracticeTopic
 }) {
   // Retrieve recent practice sessions or fallback to reference topics
-  const recentSessions = StorageService.getPracticeSessions() || [];
+  const recentSessions = (
+    typeof StorageService?.getPracticeSessions === "function"
+      ? StorageService.getPracticeSessions()
+      : typeof StorageService?.getSessions === "function"
+      ? StorageService.getSessions()
+      : []
+  ) || [];
 
   // Curated fallback topics matching reference screenshot
   const defaultRecent = [
@@ -44,15 +50,15 @@ export default function DashboardView({
   ];
 
   // Map recent topics for display
-  const displayRecent = recentSessions.length >= 2
+  const displayRecent = (Array.isArray(recentSessions) && recentSessions.length >= 2)
     ? recentSessions.slice(0, 2).map((s, idx) => ({
-        id: s.id || `sess-${idx}`,
-        title: s.topic || (idx === 0 ? "Motion & Laws" : "Cell Biology"),
-        subject: s.subjectName || (idx === 0 ? "Physics" : "Biology"),
-        grade: s.chapter || (idx === 0 ? "Class 11" : "NEET"),
-        iconType: (s.subjectName || "").toLowerCase().includes("bio") ? "biology" : "physics",
-        categoryId: s.categoryId || (idx === 0 ? "class_11" : "neet"),
-        subjectId: s.subjectId
+        id: s?.id || `sess-${idx}`,
+        title: s?.topic || (idx === 0 ? "Motion & Laws" : "Cell Biology"),
+        subject: s?.subjectName || (idx === 0 ? "Physics" : "Biology"),
+        grade: s?.chapter || (idx === 0 ? "Class 11" : "NEET"),
+        iconType: (s?.subjectName || "").toLowerCase().includes("bio") ? "biology" : "physics",
+        categoryId: s?.categoryId || (idx === 0 ? "class_11" : "neet"),
+        subjectId: s?.subjectId
       }))
     : defaultRecent;
 

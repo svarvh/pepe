@@ -74,15 +74,15 @@ export default function PublicLandingPage({
             {currentUser ? (
               <div className="landing-auth-pill">
                 <span className="landing-user-greeting">
-                  Signed in as <strong>{currentUser.name}</strong>
-                  {currentUser.role === "admin" && <span className="admin-chip">Admin</span>}
-                  {currentUser.role === "faculty" && <span className="admin-chip faculty">Faculty</span>}
+                  Signed in as <strong>{currentUser?.name || currentUser?.fullName || "Student"}</strong>
+                  {currentUser?.role === "admin" && <span className="admin-chip">Admin</span>}
+                  {currentUser?.role === "faculty" && <span className="admin-chip faculty">Faculty</span>}
                 </span>
-                {currentUser.role === "admin" ? (
+                {currentUser?.role === "admin" ? (
                   <button onClick={onGoToAdmin} className="btn-landing-primary">
                     Go to Admin Panel <ArrowRight size={16} />
                   </button>
-                ) : currentUser.role === "faculty" ? (
+                ) : currentUser?.role === "faculty" ? (
                   <button onClick={onGoToFaculty} className="btn-landing-primary">
                     Go to Faculty Panel <ArrowRight size={16} />
                   </button>

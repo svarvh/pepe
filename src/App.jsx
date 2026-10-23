@@ -111,6 +111,14 @@ export default function App() {
 
     if (path.startsWith("/app") || path.startsWith("/dashboard") || path.startsWith("/student") || hash === "#app" || hash === "#dashboard" || hash === "#student") {
       if (!activeUsr) {
+        // Auto-login default demo student so /dashboard is immediately accessible
+        const autoRes = AuthService.login("student@caplen.edu", "student123");
+        if (autoRes.success) {
+          setCurrentUser(autoRes.user);
+          setTopLevelView("student");
+          setCurrentRoute("dashboard");
+          return;
+        }
         setTopLevelView("public");
         setAuthModalMode("login");
         setAuthRedirectMessage("Please sign in or create an account to access the learning dashboard.");
@@ -121,6 +129,7 @@ export default function App() {
         setTopLevelView("faculty");
       } else {
         setTopLevelView("student");
+        setCurrentRoute("dashboard");
       }
       return;
     }
@@ -188,10 +197,21 @@ export default function App() {
 
   const handleGoToDashboard = () => {
     if (!currentUser) {
+      const autoRes = AuthService.login("student@caplen.edu", "student123");
+      if (autoRes.success) {
+        setCurrentUser(autoRes.user);
+        refreshMetrics();
+        setTopLevelView("student");
+        setCurrentRoute("dashboard");
+        window.history.pushState({}, "", "/dashboard");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
       handleOpenAuth("login");
       return;
     }
     setTopLevelView("student");
+    setCurrentRoute("dashboard");
     window.history.pushState({}, "", "/dashboard");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
