@@ -4,47 +4,31 @@
    ========================================================================== */
 
 :root {
-  /* Green & White Master Brand Tokens (Matching Public Landing Page) */
+  /* Green & White Master Brand Tokens (Exact Design System) */
   --bg-outer: #E6F4EA;            /* Soft mint/green-tinted wrapper */
-  --bg-main: #F8FAFC;             /* Clean crisp off-white surface */
-  --bg-card: #FFFFFF;             /* Crisp white card background */
+  --bg-main: #F7FAF8;             /* Page background: #F7FAF8 */
+  --bg-page: #F7FAF8;
+  --bg-card: #FFFFFF;             /* Card background: #FFFFFF */
   --bg-sidebar: #FFFFFF;          /* Pure white sidebar surface */
   
   /* Primary Green Brand Palette */
-  --color-green-primary: #10b981;
-  --color-green-dark: #059669;
-  --color-green-deep: #064e3b;
-  --color-green-light: #d1fae5;
-  --color-green-soft: #f0fdf4;
-  --color-green-mint: #ecfdf5;
-
-  /* Feature Green-Forest Surfaces (replacing old navy-purple) */
-  --navy-dark: #064e3b;           /* Rich deep forest green banner & key accents */
-  --navy-deep: #022c22;           /* Deepest forest green */
-  --navy-card-border: rgba(16, 185, 129, 0.15);
-
-  /* Signature Accents - Harmonized with Green theme */
-  --pastel-lavender: #ffffff;     /* Card 01 - Clean crisp white card */
-  --pastel-lavender-light: #ecfdf5;
-  --pastel-lavender-dark: #047857;
-
-  --pastel-cream: #ecfdf5;        /* Card 02 - Soft mint card */
-  --pastel-cream-light: #f0fdf4;
-  --pastel-cream-dark: #065f46;
-
-  --lime-yellow: #d1fae5;         /* Card 03 - Light emerald card */
-  --lime-yellow-dark: #064e3b;
-  --lime-yellow-glow: rgba(16, 185, 129, 0.35);
+  --color-green-primary: #07865B; /* Primary green: #07865B */
+  --color-green-dark: #075B43;    /* Dark green: #075B43 */
+  --color-green-deep: #075B43;
+  --color-green-light: #E9F9F0;   /* Light green: #E9F9F0 */
+  --color-green-soft: #E9F9F0;
+  --color-green-mint: #E9F9F0;
 
   /* Typography Colors */
-  --text-primary: #0f172a;        /* High-contrast slate 900 body and titles */
-  --text-secondary: #475569;      /* Slate 600 for secondary metadata */
-  --text-muted: #94a3b8;          /* Slate 400 for placeholders */
-  --text-inverse: #FFFFFF;        /* Crisp white text for banners */
+  --text-primary: #17221F;        /* Primary text: #17221F */
+  --text-secondary: #66736D;      /* Secondary text: #66736D */
+  --text-muted: #8c9b94;          /* Slate placeholder */
+  --text-inverse: #FFFFFF;
 
   /* Borders & Dividers */
-  --border-subtle: #e2e8f0;       /* Divider lines & minimal borders */
-  --border-light: rgba(16, 185, 129, 0.08);
+  --border-subtle: #E5ECE8;       /* Borders: #E5ECE8 */
+  --border-card: #E5ECE8;
+  --border-light: #E5ECE8;
 
   /* Functional / Semantic Colors */
   --semantic-success-bg: #ecfdf5;

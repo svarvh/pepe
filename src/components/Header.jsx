@@ -1,18 +1,13 @@
 import React, { useState } from "react";
 import {
   Search,
-  Mail,
   Bell,
   X,
   ArrowUpRight,
-  BookOpen,
-  FileText,
-  Menu,
   Sparkles,
-  Layers,
-  Video,
   ChevronDown,
-  GraduationCap
+  GraduationCap,
+  Menu
 } from "lucide-react";
 import { StorageService } from "../services/storage";
 
@@ -33,7 +28,7 @@ export default function Header({
   const [isMobileSearchExpanded, setIsMobileSearchExpanded] = useState(false);
 
   const courses = StorageService.getCourses();
-  const currentCourse = StorageService.getCourseById(activeCourse || StorageService.getActiveCourse());
+  const currentCourse = StorageService.getCourseById(activeCourse || StorageService.getActiveCourse()) || courses[0];
   const allQuestions = StorageService.getQuestions();
   const allPapers = StorageService.getPapers();
   const allTerms = StorageService.getAllTerminology();
@@ -67,7 +62,7 @@ export default function Header({
   const notifications = [
     { id: 1, title: "Exam Scheduled", desc: "IIT-JEE Mechanics Full Mock Test starts at 3:00 PM", time: "10m ago", unread: true },
     { id: 2, title: "Weekly Goal Met!", desc: "You have completed 84 practice questions this week", time: "1h ago", unread: false },
-    { id: 3, title: "New Solved PYQ Added", desc: "UGC-NET Paper 1 & CBSE 2024 solutions published", time: "1d ago", unread: false }
+    { id: 3, title: "New Solved PYQ Added", desc: "CBSE & NEET 2024 solutions published", time: "1d ago", unread: false }
   ];
 
   const handleSelectCourse = (courseId) => {
@@ -90,29 +85,43 @@ export default function Header({
         </button>
 
         <div className="header-mobile-brand" onClick={() => onNavigate("dashboard")}>
-          <div className="landing-logo-icon" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              backgroundColor: "#07865B",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0
+            }}
+          >
             <GraduationCap size={18} strokeWidth={2.4} color="#ffffff" />
           </div>
-          <span className="mobile-brand-title">Caplen</span>
+          <span className="mobile-brand-title" style={{ color: "#17221F", fontWeight: 800 }}>
+            Caplen
+          </span>
         </div>
       </div>
 
-      {/* Global Course Switcher Pill */}
+      {/* 1. Global Class / Exam Selector Pill matching screenshot */}
       <div className="header-course-switcher-wrapper">
         <button
           className="header-course-pill-btn"
           id="btn-switch-course"
           onClick={() => setShowCourseMenu(!showCourseMenu)}
+          title="Switch current class or competitive exam"
         >
-          <GraduationCap size={16} />
+          <GraduationCap size={16} strokeWidth={2.2} color="#17221F" />
           <span className="course-pill-label">{currentCourse.name}</span>
-          <ChevronDown size={14} />
+          <ChevronDown size={14} strokeWidth={2.2} color="#66736D" />
         </button>
 
         {showCourseMenu && (
           <div className="course-dropdown-popover fade-in">
             <div className="course-dropdown-header">
-              <span>Switch Curriculum Track</span>
+              <span>Select Class or Exam Track</span>
             </div>
             {courses.map((c) => (
               <button
@@ -122,7 +131,7 @@ export default function Header({
               >
                 <div className="course-item-title-row">
                   <strong>{c.name}</strong>
-                  <span className="badge badge-navy badge-sm">{c.badge}</span>
+                  <span className="badge badge-sm">{c.badge}</span>
                 </div>
                 <span className="course-item-desc">{c.description}</span>
               </button>
@@ -131,15 +140,15 @@ export default function Header({
         )}
       </div>
 
-      {/* Global Search Bar (Module A Search Engine) */}
+      {/* 2. Global Search Bar matching screenshot */}
       <div className={`header-search-container ${isMobileSearchExpanded ? "mobile-expanded" : ""}`}>
         <div className="search-input-wrapper">
-          <Search size={18} className="search-icon" />
+          <Search size={17} strokeWidth={2.2} className="search-icon" color="#66736D" />
           <input
             type="text"
             id="global-search-input"
             className="search-input"
-            placeholder="Search scientific terms, notes, PYQs, formulas..."
+            placeholder="Search topics, notes, formulas..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsMobileSearchExpanded(true)}
@@ -162,17 +171,16 @@ export default function Header({
           )}
         </div>
 
-        {/* Global Multi-Index Search Dropdown */}
+        {/* Multi-Index Search Dropdown */}
         {searchQuery.trim().length > 1 && (
           <div className="search-results-dropdown fade-in">
-            {/* 1. Scientific & Technical Terminology */}
             {matchingTerms.length > 0 && (
               <div className="search-results-section">
                 <span className="search-section-label">
                   <Sparkles size={13} style={{ marginRight: 4 }} />
                   Scientific Terminology ({matchingTerms.length})
                 </span>
-                {matchingTerms.map(term => (
+                {matchingTerms.map((term) => (
                   <div
                     key={term.id}
                     className="search-result-item term-item"
@@ -195,48 +203,42 @@ export default function Header({
               </div>
             )}
 
-            {/* 2. Questions */}
-            <div className="search-results-section">
-              <span className="search-section-label">Practice Questions ({matchingQuestions.length})</span>
-              {matchingQuestions.length === 0 && matchingTerms.length === 0 ? (
-                <div className="search-empty">No exact match found. Try another concept.</div>
-              ) : (
-                matchingQuestions.map(q => (
+            {matchingQuestions.length > 0 && (
+              <div className="search-results-section">
+                <span className="search-section-label">Practice Questions ({matchingQuestions.length})</span>
+                {matchingQuestions.map((q) => (
                   <div
                     key={q.id}
                     className="search-result-item"
                     onClick={() => {
                       setSearchQuery("");
                       setIsMobileSearchExpanded(false);
-                      onNavigate("practice");
+                      onNavigate("question-practice");
                     }}
                   >
-                    <BookOpen size={15} className="result-icon-lavender" />
                     <div className="result-text-col">
                       <span className="result-title">{q.text}</span>
-                      <span className="result-meta">{q.topic} • {q.difficulty}</span>
+                      <span className="result-meta">{q.topic || q.unit} • {q.marks || 4} Marks</span>
                     </div>
                     <ArrowUpRight size={14} className="result-arrow" />
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
 
-            {/* 3. Previous Year Papers */}
             {matchingPapers.length > 0 && (
               <div className="search-results-section">
-                <span className="search-section-label">Exam Papers ({matchingPapers.length})</span>
-                {matchingPapers.map(p => (
+                <span className="search-section-label">Papers & Notes ({matchingPapers.length})</span>
+                {matchingPapers.map((p) => (
                   <div
                     key={p.id}
                     className="search-result-item"
                     onClick={() => {
                       setSearchQuery("");
                       setIsMobileSearchExpanded(false);
-                      onNavigate("pyq");
+                      onNavigate("topic-reading");
                     }}
                   >
-                    <FileText size={15} className="result-icon-cream" />
                     <div className="result-text-col">
                       <span className="result-title">{p.title}</span>
                       <span className="result-meta">{p.year} • {p.subject}</span>
@@ -250,16 +252,9 @@ export default function Header({
         )}
       </div>
 
-      {/* Header Actions (Envelope, Bell, Avatar matching screenshot) */}
+      {/* 3. Header Actions (Notification Bell & User Avatar with Chevron) */}
       <div className="header-actions">
-        <button
-          className="header-icon-btn header-mail-btn"
-          title="Study Reminders & Messages"
-          onClick={() => alert("All study reminders and mentor feedbacks are synced.")}
-        >
-          <Mail size={19} strokeWidth={1.8} />
-        </button>
-
+        {/* Notification Bell */}
         <div className="notification-wrapper">
           <button
             className="header-icon-btn notification-btn"
@@ -267,7 +262,7 @@ export default function Header({
             title="Notifications"
             onClick={() => setShowNotifications(!showNotifications)}
           >
-            <Bell size={19} strokeWidth={1.8} />
+            <Bell size={19} strokeWidth={2} color="#17221F" />
             <span className="notification-dot" />
           </button>
 
@@ -278,7 +273,7 @@ export default function Header({
                 <span className="badge badge-navy">1 New</span>
               </div>
               <div className="notifications-list">
-                {notifications.map(n => (
+                {notifications.map((n) => (
                   <div key={n.id} className={`notification-item ${n.unread ? "unread" : ""}`}>
                     <div className="notification-dot-small" />
                     <div className="notification-content">
@@ -293,7 +288,7 @@ export default function Header({
           )}
         </div>
 
-        {/* User Avatar */}
+        {/* User Avatar with ChevronDown */}
         <div className="header-user-wrapper">
           <button
             className="user-avatar-btn"
@@ -301,18 +296,21 @@ export default function Header({
             onClick={() => setShowProfileMenu(!showProfileMenu)}
           >
             <img
-              src={user.avatar}
-              alt={user.fullName}
+              src={user?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"}
+              alt={user?.fullName || "Student Avatar"}
               className="user-avatar-img"
             />
+            <ChevronDown size={14} strokeWidth={2.2} color="#66736D" className="avatar-chevron" />
           </button>
 
           {showProfileMenu && (
             <div className="profile-dropdown-menu fade-in">
               <div className="profile-menu-header">
-                <strong>{user.fullName}</strong>
-                <span>{user.email}</span>
-                <span className="badge badge-lime" style={{ marginTop: 6 }}>{user.targetExam}</span>
+                <strong>{user?.fullName || "Student"}</strong>
+                <span>{user?.email || "student@caplen.edu"}</span>
+                <span className="badge badge-lime" style={{ marginTop: 6 }}>
+                  {user?.targetExam || "Class 11 & 12"}
+                </span>
               </div>
               <div className="profile-menu-divider" />
               <button
@@ -322,7 +320,7 @@ export default function Header({
                   onNavigate("settings");
                 }}
               >
-                Settings & API Config
+                Settings & Preferences
               </button>
               <button
                 className="profile-menu-item"
@@ -331,7 +329,7 @@ export default function Header({
                   onNavigate("analytics");
                 }}
               >
-                Performance Analytics
+                My Progress
               </button>
               <button
                 className="profile-menu-item"
