@@ -78,34 +78,14 @@ export default function DashboardView({
 
   return (
     <div className="minimal-dashboard-container fade-in">
-      {/* Track Quick Switcher Pills: Separate URL for each exam (/jee, /neet, /class-12, /class-11, /class-10, /class-9, /ugc-net) */}
-      <div className="track-pills-scroll-container">
-        {EXAM_TRACKS.map((t) => {
-          const isActive = t.id === currentTrack.id || t.slug === currentTrack.slug;
-          return (
-            <button
-              key={t.id}
-              className={`track-pill-item ${isActive ? "active" : ""}`}
-              onClick={() => onCourseChange && onCourseChange(t.id)}
-              title={`Switch to ${t.name} (${t.slug})`}
-            >
-              <span className="track-pill-name">{t.shortName}</span>
-              <span className="track-pill-url">{t.slug}</span>
-            </button>
-          );
-        })}
-      </div>
-
       {/* 1. Main Welcome Section */}
       <section className="dashboard-welcome-section">
-        <span className="learning-space-eyebrow">
-          {currentTrack.shortName.toUpperCase()} PREPARATION SPACE
-        </span>
+        <span className="learning-space-eyebrow">YOUR LEARNING SPACE</span>
         <h1 className="learning-space-heading">
-          Ready to master <span className="highlight-green-text">{currentTrack.shortName}?</span>
+          What would you like to do <span className="highlight-green-text">today?</span>
         </h1>
         <p className="learning-space-subtitle">
-          {currentTrack.tagline || "Choose a path and learn at your own pace."}
+          Choose a path and learn at your own pace.
         </p>
       </section>
 
@@ -198,7 +178,7 @@ export default function DashboardView({
               }
             }}
           >
-            <span>Explore {currentTrack.shortName} topics</span>
+            <span>Explore topics</span>
             <ArrowRight size={17} strokeWidth={2.4} />
           </button>
         </div>
@@ -296,7 +276,7 @@ export default function DashboardView({
               }
             }}
           >
-            <span>Start {currentTrack.shortName} practice</span>
+            <span>Start practicing</span>
             <ArrowRight size={17} strokeWidth={2.4} />
           </button>
         </div>
@@ -305,7 +285,7 @@ export default function DashboardView({
       {/* 3. Recent Learning Section ("Pick up where you left off") */}
       <section className="recent-learning-section">
         <div className="recent-header-row">
-          <h3 className="recent-title">Pick up where you left off in {currentTrack.shortName}</h3>
+          <h3 className="recent-title">Pick up where you left off</h3>
           <button
             type="button"
             id="btn-recent-view-all"
